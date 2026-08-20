@@ -2796,9 +2796,7 @@ function AppInner() {
                 <span style={styles.blankBox}>□</span>
                 {blankedExample(question.entry, question.char).after}
               </div>
-              <div style={{ opacity: 0.7, fontSize: 13, textAlign: "center", marginBottom: 4 }}>
-                よみかた：{question.entry.exampleReading}
-              </div>
+              <div style={styles.writeReadingText}>よみかた：{question.entry.exampleReading}</div>
               <WritingPad key={writeKey} char={question.char} size={200} showAnswer={answerRevealed} />
               <div style={styles.bannerWrap}>
                 {!answerRevealed ? (
@@ -3296,6 +3294,13 @@ const styles = {
     fontSize: "0.6em",
     color: "#ffd37a",
     margin: "0 2px",
+  },
+  writeReadingText: {
+    fontFamily: "'Yusei Magic', sans-serif",
+    fontSize: 24,
+    color: "#f1eefc",
+    textAlign: "center",
+    marginBottom: 6,
   },
   choiceGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, width: "100%", maxWidth: 420 },
   choiceBtn: { background: "#25235093", border: "1px solid #4b477f", borderRadius: 14, padding: "14px 10px", color: "#f4f2ff", fontSize: 14, fontWeight: 700, cursor: "pointer" },

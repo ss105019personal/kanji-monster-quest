@@ -2286,25 +2286,35 @@ function AppInner() {
   );
   const isCaptured = useCallback((char) => clearedCountOf(char) >= 3, [clearedCountOf]);
 
-  /* --- 出題生成：まだ できていない「漢字×しゅるい」の組から ランダムに1つ --- */
+  /* --- 出題生成：まだ できていない「漢字×しゅるい」の組から ランダムに1つ（ときどき ふくしゅうも まざる） --- */
   const makeQuestion = useCallback(
     (g) => {
       const chars = g.chars;
       const unclearedPairs = [];
+      const capturedChars = [];
       chars.forEach((c) => {
         const p = progress[c];
+        const doneAll = !!(p && p.reading && p.meaning && p.write);
+        if (doneAll) capturedChars.push(c);
         ["reading", "meaning", "write"].forEach((m) => {
           if (!(p && p[m])) unclearedPairs.push([c, m]);
         });
       });
 
       let char, mode;
-      if (unclearedPairs.length > 0) {
+      const wantsReview = capturedChars.length > 0 && Math.random() < 0.18;
+      if (wantsReview) {
+        // なかまに した モンスターの ふくしゅう（けいけんちが たまり続けるように）
+        char = capturedChars[Math.floor(Math.random() * capturedChars.length)];
+        mode = ["reading", "meaning", "write"][Math.floor(Math.random() * 3)];
+      } else if (unclearedPairs.length > 0) {
         const pick = unclearedPairs[Math.floor(Math.random() * unclearedPairs.length)];
         char = pick[0];
         mode = pick[1];
+      } else if (capturedChars.length > 0) {
+        char = capturedChars[Math.floor(Math.random() * capturedChars.length)];
+        mode = ["reading", "meaning", "write"][Math.floor(Math.random() * 3)];
       } else {
-        // ぜんぶ クリアずみ：ふくしゅうとして ランダムに出題
         char = chars[Math.floor(Math.random() * chars.length)];
         mode = ["reading", "meaning", "write"][Math.floor(Math.random() * 3)];
       }

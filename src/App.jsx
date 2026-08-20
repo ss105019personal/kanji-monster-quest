@@ -1475,6 +1475,12 @@ function guardianById(id) {
   return GUARDIANS.find((g) => g.id === id) || null;
 }
 
+/* 0/1/2/3クリアに応じて 銅・銀・金の わく色を かえす */
+const TIER_COLORS = { 1: "#cd7f32", 2: "#c7ccd1", 3: "#ffd54a" };
+function tierBorderColor(n) {
+  return TIER_COLORS[n] || null;
+}
+
 /* ---- 青龍：ながく うねる りゅう ---- */
 function SeiryuArt({ colorA, colorB, accent }) {
   const spine = "M6,85 C4,55 20,24 48,22 C74,20 78,48 56,54 C36,60 40,84 60,90 C82,96 100,78 108,50";
@@ -2862,17 +2868,25 @@ function AppInner() {
                     const inParty = party.includes(c);
                     const entry = KANJI_DB[c];
                     const readingsText = [...entry.on, ...entry.kun].join("・");
+                    const tierColor = tierBorderColor(n);
                     return (
                       <button
                         key={c}
                         onClick={() => isCap && setDetail(c)}
                         style={{
                           ...styles.zukanCard,
+                          ...(tierColor ? { borderColor: tierColor, borderWidth: 3 } : {}),
                           ...(inParty ? styles.zukanCardInParty : {}),
                           cursor: isCap ? "pointer" : "default",
                         }}
+                        className={n >= 3 ? "mastered-glow" : ""}
                       >
                         {inParty && <div style={styles.partyBadge}>🎒</div>}
+                        {tierColor && (
+                          <div style={{ ...styles.tierBadge, background: tierColor, color: n === 3 ? "#3a2a06" : "#1c1c22" }}>
+                            {n === 3 ? "金" : n === 2 ? "銀" : "銅"}
+                          </div>
+                        )}
                         <MonsterCreature char={c} clearedCount={n} size={64} />
                         <div style={styles.zukanCardLabel}>{revealed ? c : "？？？"}</div>
                         <div style={styles.zukanCardReading}>{revealed ? readingsText : "？"}</div>
@@ -3129,6 +3143,11 @@ function GlobalStyle() {
         background-size: 300% 100% !important;
         animation: genesisSpin 3s linear infinite;
       }
+      @keyframes masteredGlow {
+        0%, 100% { box-shadow: 0 0 4px 1px rgba(255,213,74,0.45); }
+        50% { box-shadow: 0 0 10px 3px rgba(255,213,74,0.8); }
+      }
+      .mastered-glow { animation: masteredGlow 2.2s ease-in-out infinite; }
       button { font-family: inherit; }
       button:focus-visible { outline: 3px solid #ffd37a; outline-offset: 2px; }
       @media (prefers-reduced-motion: reduce) {
@@ -3400,6 +3419,21 @@ const styles = {
     justifyContent: "center",
     fontSize: 11,
     boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
+  },
+  tierBadge: {
+    position: "absolute",
+    top: -8,
+    left: -6,
+    borderRadius: "50%",
+    width: 20,
+    height: 20,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 11,
+    fontWeight: 900,
+    boxShadow: "0 2px 6px rgba(0,0,0,0.45)",
+    border: "1px solid rgba(0,0,0,0.25)",
   },
   partyTag: {
     position: "absolute",

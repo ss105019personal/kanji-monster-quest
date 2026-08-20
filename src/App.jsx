@@ -1138,6 +1138,12 @@ function heroTierFromLevel(level) {
 function heroTitleFromLevel(level) {
   return HERO_TITLES[heroTierFromLevel(level)];
 }
+function heroLevelsUntilNextTier(level) {
+  const tier = heroTierFromLevel(level);
+  if (tier >= 10) return 0;
+  const nextTierStart = tier < 9 ? tier * 11 + 1 : HERO_MAX_LEVEL;
+  return Math.max(0, nextTierStart - level);
+}
 
 const BLOB_PATHS = [
   "M60,10 C88,8 106,32 104,58 C102,88 82,112 56,113 C28,114 8,92 8,62 C8,32 32,12 60,10 Z",
@@ -2600,6 +2606,7 @@ function AppInner() {
   ]);
   const heroLevel = useMemo(() => heroLevelFromExp(heroExp), [heroExp]);
   const heroTitle = useMemo(() => heroTitleFromLevel(heroLevel), [heroLevel]);
+  const heroLevelsToEvolve = useMemo(() => heroLevelsUntilNextTier(heroLevel), [heroLevel]);
   const heroLevelStart = useMemo(() => heroExpForLevel(heroLevel), [heroLevel]);
   const heroLevelEnd = useMemo(() => heroExpForLevel(Math.min(HERO_MAX_LEVEL, heroLevel + 1)), [heroLevel]);
   const heroLevelProgress =
@@ -2978,6 +2985,11 @@ function AppInner() {
               {heroLevel >= HERO_MAX_LEVEL
                 ? "ぜんかんじ マスター！さいだいレベルに とうたつ！"
                 : `つぎの Lv.${heroLevel + 1} まで けいけんち ${Math.max(0, heroLevelEnd - heroExp)}`}
+            </div>
+            <div style={styles.evolveNote}>
+              {heroLevelsToEvolve > 0
+                ? `🌟 しんかまで あと ${heroLevelsToEvolve} レベル`
+                : "✨ さいこうい の しょうごうに とうたつ！"}
             </div>
             <button style={styles.miniBtn} onClick={() => setScreen("shop")}>
               🛡 そうびを かえる
@@ -3454,6 +3466,16 @@ const styles = {
     fontSize: 15,
     color: "#ffd37a",
     textAlign: "center",
+  },
+  evolveNote: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: "#7fe3ff",
+    background: "#1c1a3d",
+    border: "1px solid #322f61",
+    borderRadius: 999,
+    padding: "4px 12px",
+    marginTop: 2,
   },
   partySlotCard: {
     background: "#211f47",

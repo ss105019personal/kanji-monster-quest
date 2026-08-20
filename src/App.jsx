@@ -1118,6 +1118,27 @@ function heroExpForLevel(lvl) {
   return Math.ceil(((lvl - 1) * HERO_EXP_FOR_MAX_LEVEL) / (HERO_MAX_LEVEL - 1));
 }
 
+/* Lv.1〜100を10だんかいに分ける（Lv.100だけ とくべつな10だんめ） */
+const HERO_TITLES = {
+  1: "クラスの人気者",
+  2: "げんきな しんじん ぼうけんしゃ",
+  3: "みならい けんし",
+  4: "いちにんまえの ぼうけんしゃ",
+  5: "ゆうかんな せんし",
+  6: "せいぎの エリートきし",
+  7: "えいゆう",
+  8: "たいえいゆう",
+  9: "ふはいの ゆうしゃ",
+  10: "でんせつの ゆうしゃ",
+};
+function heroTierFromLevel(level) {
+  if (level >= HERO_MAX_LEVEL) return 10;
+  return Math.max(1, Math.min(9, Math.ceil(level / 11)));
+}
+function heroTitleFromLevel(level) {
+  return HERO_TITLES[heroTierFromLevel(level)];
+}
+
 const BLOB_PATHS = [
   "M60,10 C88,8 106,32 104,58 C102,88 82,112 56,113 C28,114 8,92 8,62 C8,32 32,12 60,10 Z",
   "M58,8 C82,4 108,22 110,52 C112,84 90,110 60,112 C32,114 10,90 10,60 C10,30 34,12 58,8 Z",
@@ -1939,26 +1960,49 @@ function statsLabel(item) {
   return parts.join(" ");
 }
 
-function HeroAuraGlow({ level }) {
-  if (level < 25) return null;
-  const color = level >= 100 ? "#ffe9a8" : level >= 75 ? "#ffd24d" : level >= 50 ? "#7fe3ff" : "#c98cff";
-  const opacity = level >= 100 ? 0.32 : level >= 75 ? 0.24 : level >= 50 ? 0.19 : 0.14;
-  return <circle cx="70" cy="90" r="95" fill={color} opacity={opacity} />;
+function HeroAuraGlow({ tier }) {
+  if (tier < 3) return null;
+  const palette = { 3: "#c98cff", 4: "#c98cff", 5: "#9fd6ff", 6: "#7fe3ff", 7: "#7fe3ff", 8: "#ffd24d", 9: "#ffd24d", 10: "#ffe9a8" };
+  const opacityMap = { 3: 0.1, 4: 0.14, 5: 0.16, 6: 0.18, 7: 0.2, 8: 0.24, 9: 0.28, 10: 0.36 };
+  return <circle cx="70" cy="90" r="95" fill={palette[tier]} opacity={opacityMap[tier]} />;
 }
 
-function HeroWings({ level }) {
-  if (level < 50) return null;
-  const color = level >= 100 ? "#ffe9a8" : level >= 75 ? "#ffd24d" : "#7fe3ff";
+function HeroLegendBurst({ tier }) {
+  if (tier < 10) return null;
+  const beams = [0, 45, 90, 135, 180, 225, 270, 315];
   return (
-    <g fill={color} stroke={OUTLINE} strokeWidth="2.5" opacity="0.92">
-      <path d="M40,72 C6,62 -16,28 -4,-6 C12,20 28,44 46,60 Z" />
-      <path d="M100,72 C134,62 156,28 144,-6 C128,20 112,44 94,60 Z" />
+    <g opacity="0.45">
+      {beams.map((deg) => (
+        <rect key={deg} x="66" y="-42" width="8" height="52" rx="4" fill="#ffe9a8" transform={`rotate(${deg} 70 90)`} />
+      ))}
     </g>
   );
 }
 
-function HeroCrown({ level }) {
-  if (level < 75) return null;
+function HeroWings({ tier }) {
+  if (tier < 5) return null;
+  const scale = tier >= 10 ? 1.25 : tier >= 8 ? 1.1 : tier >= 6 ? 1.0 : 0.72;
+  const color = tier >= 9 ? "#ffe9a8" : tier >= 7 ? "#ffd24d" : "#7fe3ff";
+  return (
+    <g style={{ transform: `scale(${scale})`, transformOrigin: "70px 60px" }}>
+      <g fill={color} stroke={OUTLINE} strokeWidth="2.5" opacity="0.92">
+        <path d="M40,72 C6,62 -16,28 -4,-6 C12,20 28,44 46,60 Z" />
+        <path d="M100,72 C134,62 156,28 144,-6 C128,20 112,44 94,60 Z" />
+      </g>
+    </g>
+  );
+}
+
+function HeroCrown({ tier }) {
+  if (tier < 7) return null;
+  if (tier < 8) {
+    return (
+      <g fill="#ffd24d" stroke={OUTLINE} strokeWidth="1.6">
+        <rect x="54" y="4" width="32" height="7" rx="3.5" />
+        <circle cx="70" cy="7.5" r="2.6" fill="#fff6d5" stroke={OUTLINE} strokeWidth="1" />
+      </g>
+    );
+  }
   return (
     <g fill="#ffd24d" stroke={OUTLINE} strokeWidth="1.8">
       <polygon points="52,-6 58,-20 63,-9 70,-24 77,-9 82,-20 88,-6" />
@@ -1967,20 +2011,25 @@ function HeroCrown({ level }) {
   );
 }
 
-function HeroSparkles({ level }) {
-  if (level < 100) return null;
+function HeroSparkles({ tier }) {
+  if (tier < 9) return null;
   return (
     <g fill="#fff6d5" opacity="0.95">
       <circle cx="6" cy="46" r="3" />
       <circle cx="134" cy="56" r="2.6" />
-      <circle cx="14" cy="150" r="2.6" />
-      <circle cx="126" cy="160" r="3" />
-      <circle cx="70" cy="-34" r="2.4" />
+      {tier >= 10 && (
+        <>
+          <circle cx="14" cy="150" r="2.6" />
+          <circle cx="126" cy="160" r="3" />
+          <circle cx="70" cy="-34" r="2.4" />
+        </>
+      )}
     </g>
   );
 }
 
 function HeroAvatar({ equipped, size = 150, level = 1 }) {
+  const tier = heroTierFromLevel(level);
   const helmet = equipped.helmet && itemById("helmet", equipped.helmet);
   const body = equipped.body && itemById("body", equipped.body);
   const shoes = equipped.shoes && itemById("shoes", equipped.shoes);
@@ -1993,8 +2042,9 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
 
   return (
     <svg viewBox="0 0 140 190" width={size} height={size * (190 / 140)} style={{ overflow: "visible" }}>
-      <HeroAuraGlow level={level} />
-      <HeroWings level={level} />
+      <HeroLegendBurst tier={tier} />
+      <HeroAuraGlow tier={tier} />
+      <HeroWings tier={tier} />
 
       {/* マント */}
       <path
@@ -2062,7 +2112,7 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
         />
       )}
 
-      <HeroCrown level={level} />
+      <HeroCrown tier={tier} />
 
       {/* けん（むかって右うで） */}
       {sword && (
@@ -2074,7 +2124,7 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
         </g>
       )}
 
-      <HeroSparkles level={level} />
+      <HeroSparkles tier={tier} />
     </svg>
   );
 }
@@ -2452,7 +2502,13 @@ function AppInner() {
         setResultBanner("partial");
       }
       if (newHeroLevel > prevHeroLevel) {
-        setLevelUpNote(`⭐ ${profile} が Lv.${newHeroLevel} に レベルアップ！`);
+        const prevTier = heroTierFromLevel(prevHeroLevel);
+        const newTier = heroTierFromLevel(newHeroLevel);
+        if (newTier > prevTier) {
+          setLevelUpNote(`⭐ ${profile} が Lv.${newHeroLevel}「${HERO_TITLES[newTier]}」に なった！`);
+        } else {
+          setLevelUpNote(`⭐ ${profile} が Lv.${newHeroLevel} に レベルアップ！`);
+        }
       }
     },
     [progress, heroExp, gold, persistAll, profile]
@@ -2543,6 +2599,7 @@ function AppInner() {
     equipmentByChar,
   ]);
   const heroLevel = useMemo(() => heroLevelFromExp(heroExp), [heroExp]);
+  const heroTitle = useMemo(() => heroTitleFromLevel(heroLevel), [heroLevel]);
   const heroLevelStart = useMemo(() => heroExpForLevel(heroLevel), [heroLevel]);
   const heroLevelEnd = useMemo(() => heroExpForLevel(Math.min(HERO_MAX_LEVEL, heroLevel + 1)), [heroLevel]);
   const heroLevelProgress =
@@ -2912,6 +2969,7 @@ function AppInner() {
           <div style={styles.wildLabel}>あなたの ゆうしゃ「{profile}」</div>
           <div style={styles.heroPartyCard}>
             <HeroAvatar equipped={equipmentByChar.hero || {}} size={130} level={heroLevel} />
+            <div style={styles.heroTitleText}>「{heroTitle}」</div>
             <LevelBadge level={heroLevel} />
             <div style={styles.expBarBg}>
               <div style={{ ...styles.expBarFill, width: `${heroLevelProgress}%` }} />
@@ -3018,7 +3076,7 @@ function AppInner() {
                   <GuardianCreature guardianId={equipSlotChar} size={130} equipment={equipmentByChar[equipSlotChar]} />
                 )}
                 <div style={styles.zukanCardLabel}>
-                  {equipSlotChar === "hero" ? `${profile}（Lv.${heroLevel}）` : guardianById(equipSlotChar)?.name}
+                  {equipSlotChar === "hero" ? `${profile}（Lv.${heroLevel}／${heroTitle}）` : guardianById(equipSlotChar)?.name}
                 </div>
                 <div style={styles.goldPillBig}>🪙 {gold} G</div>
                 <div style={styles.statsPanel}>
@@ -3390,6 +3448,12 @@ const styles = {
     borderRadius: 20,
     padding: "16px 16px 14px",
     marginBottom: 18,
+  },
+  heroTitleText: {
+    fontFamily: "'Yusei Magic', sans-serif",
+    fontSize: 15,
+    color: "#ffd37a",
+    textAlign: "center",
   },
   partySlotCard: {
     background: "#211f47",

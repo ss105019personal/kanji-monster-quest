@@ -2446,10 +2446,10 @@ function AppInner() {
         setResultBanner("partial");
       }
       if (newHeroLevel > prevHeroLevel) {
-        setLevelUpNote(`⭐ ゆうしゃが Lv.${newHeroLevel} に レベルアップ！`);
+        setLevelUpNote(`⭐ ${profile} が Lv.${newHeroLevel} に レベルアップ！`);
       }
     },
-    [progress, heroExp, gold, persistAll]
+    [progress, heroExp, gold, persistAll, profile]
   );
 
   const onAnswer = useCallback(
@@ -2753,7 +2753,7 @@ function AppInner() {
             {party.includes(question.char) && <div style={styles.partyTag}>🎒 パーティの なかま</div>}
             <MonsterCreature
               char={question.char}
-              clearedCount={clearedCountOf(question.char)}
+              clearedCount={qMode === "write" && !resultBanner ? 0 : clearedCountOf(question.char)}
               size={140}
               pop={resultBanner === "captured"}
             />
@@ -2897,7 +2897,7 @@ function AppInner() {
             ← もどる
           </button>
 
-          <div style={styles.wildLabel}>あなたの ゆうしゃ</div>
+          <div style={styles.wildLabel}>あなたの ゆうしゃ「{profile}」</div>
           <div style={styles.heroPartyCard}>
             <HeroAvatar equipped={equipmentByChar.hero || {}} size={130} level={heroLevel} />
             <LevelBadge level={heroLevel} />
@@ -2957,7 +2957,7 @@ function AppInner() {
                 ...(equipTarget === "hero" ? styles.partySlotCardActive : {}),
               }}
             >
-              <div style={styles.partySlotLabel}>ゆうしゃ</div>
+              <div style={styles.partySlotLabel}>{profile}</div>
               <HeroAvatar equipped={equipmentByChar.hero || {}} size={48} level={heroLevel} />
               <div style={styles.zukanCardLabel}>Lv.{heroLevel}</div>
             </button>
@@ -3006,7 +3006,7 @@ function AppInner() {
                   <GuardianCreature guardianId={equipSlotChar} size={130} equipment={equipmentByChar[equipSlotChar]} />
                 )}
                 <div style={styles.zukanCardLabel}>
-                  {equipSlotChar === "hero" ? `ゆうしゃ（Lv.${heroLevel}）` : guardianById(equipSlotChar)?.name}
+                  {equipSlotChar === "hero" ? `${profile}（Lv.${heroLevel}）` : guardianById(equipSlotChar)?.name}
                 </div>
                 <div style={styles.goldPillBig}>🪙 {gold} G</div>
                 <div style={styles.statsPanel}>

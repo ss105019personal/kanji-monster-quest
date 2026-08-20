@@ -1105,12 +1105,17 @@ const TYPE_META = {
   craft: { name: "どうぐ", grad: ["#8FA3C9", "#3F5379"], accent: "#DCE6F7" },
 };
 
-const EXP_PER_ANSWER = 10;
-const EXP_PER_LEVEL = 30;
-const MAX_LEVEL = 5;
+const HERO_MAX_LEVEL = 100;
+const HERO_EXP_PER_ANSWER = 10;
+const TOTAL_MASTERY_CLEARS = Object.keys(KANJI_DB).length * 3; // よみ・いみ・かきとり ぜんぶ
+const HERO_EXP_FOR_MAX_LEVEL = TOTAL_MASTERY_CLEARS * HERO_EXP_PER_ANSWER;
 
-function levelFromExp(exp) {
-  return Math.min(MAX_LEVEL, Math.floor(exp / EXP_PER_LEVEL) + 1);
+function heroLevelFromExp(exp) {
+  const lvl = 1 + Math.floor(((HERO_MAX_LEVEL - 1) * exp) / HERO_EXP_FOR_MAX_LEVEL);
+  return Math.max(1, Math.min(HERO_MAX_LEVEL, lvl));
+}
+function heroExpForLevel(lvl) {
+  return Math.ceil(((lvl - 1) * HERO_EXP_FOR_MAX_LEVEL) / (HERO_MAX_LEVEL - 1));
 }
 
 const BLOB_PATHS = [
@@ -1818,7 +1823,7 @@ function LevelBadge({ level }) {
   return (
     <div style={styles.levelBadge}>
       Lv.{level}
-      {level >= MAX_LEVEL ? " MAX" : ""}
+      {level >= HERO_MAX_LEVEL ? " MAX" : ""}
     </div>
   );
 }
@@ -1928,7 +1933,48 @@ function statsLabel(item) {
   return parts.join(" ");
 }
 
-function HeroAvatar({ equipped, size = 150 }) {
+function HeroAuraGlow({ level }) {
+  if (level < 25) return null;
+  const color = level >= 100 ? "#ffe9a8" : level >= 75 ? "#ffd24d" : level >= 50 ? "#7fe3ff" : "#c98cff";
+  const opacity = level >= 100 ? 0.32 : level >= 75 ? 0.24 : level >= 50 ? 0.19 : 0.14;
+  return <circle cx="70" cy="90" r="95" fill={color} opacity={opacity} />;
+}
+
+function HeroWings({ level }) {
+  if (level < 50) return null;
+  const color = level >= 100 ? "#ffe9a8" : level >= 75 ? "#ffd24d" : "#7fe3ff";
+  return (
+    <g fill={color} stroke={OUTLINE} strokeWidth="2.5" opacity="0.92">
+      <path d="M40,72 C6,62 -16,28 -4,-6 C12,20 28,44 46,60 Z" />
+      <path d="M100,72 C134,62 156,28 144,-6 C128,20 112,44 94,60 Z" />
+    </g>
+  );
+}
+
+function HeroCrown({ level }) {
+  if (level < 75) return null;
+  return (
+    <g fill="#ffd24d" stroke={OUTLINE} strokeWidth="1.8">
+      <polygon points="52,-6 58,-20 63,-9 70,-24 77,-9 82,-20 88,-6" />
+      <circle cx="70" cy="-19" r="3" fill="#ff5a36" stroke={OUTLINE} strokeWidth="1.2" />
+    </g>
+  );
+}
+
+function HeroSparkles({ level }) {
+  if (level < 100) return null;
+  return (
+    <g fill="#fff6d5" opacity="0.95">
+      <circle cx="6" cy="46" r="3" />
+      <circle cx="134" cy="56" r="2.6" />
+      <circle cx="14" cy="150" r="2.6" />
+      <circle cx="126" cy="160" r="3" />
+      <circle cx="70" cy="-34" r="2.4" />
+    </g>
+  );
+}
+
+function HeroAvatar({ equipped, size = 150, level = 1 }) {
   const helmet = equipped.helmet && itemById("helmet", equipped.helmet);
   const body = equipped.body && itemById("body", equipped.body);
   const shoes = equipped.shoes && itemById("shoes", equipped.shoes);
@@ -1941,6 +1987,9 @@ function HeroAvatar({ equipped, size = 150 }) {
 
   return (
     <svg viewBox="0 0 140 190" width={size} height={size * (190 / 140)} style={{ overflow: "visible" }}>
+      <HeroAuraGlow level={level} />
+      <HeroWings level={level} />
+
       {/* マント */}
       <path
         d="M44,58 C22,66 10,102 16,152 C30,164 46,170 60,172 C74,170 90,164 104,152 C110,102 98,66 76,58 C70,66 65,70 60,70 C55,70 50,66 44,58 Z"
@@ -2007,6 +2056,8 @@ function HeroAvatar({ equipped, size = 150 }) {
         />
       )}
 
+      <HeroCrown level={level} />
+
       {/* けん（むかって右うで） */}
       {sword && (
         <g>
@@ -2016,6 +2067,8 @@ function HeroAvatar({ equipped, size = 150 }) {
           <polygon points="96,116 112,110 138,18 128,14 108,104" fill={sword.color} stroke={OUTLINE} strokeWidth="2.5" />
         </g>
       )}
+
+      <HeroSparkles level={level} />
     </svg>
   );
 }
@@ -2144,15 +2197,16 @@ function AppInner() {
   const [profileError, setProfileError] = useState("");
 
   const [loaded, setLoaded] = useState(false);
-  const [progress, setProgress] = useState({}); // char -> { reading, meaning, write, exp, level }
+  const [progress, setProgress] = useState({}); // char -> { reading, meaning, write }
+  const [heroExp, setHeroExp] = useState(0);
   const [party, setParty] = useState([null, null, null]); // 3スロット固定：しじんの id
   const [partySetupDone, setPartySetupDone] = useState(false);
   const [guardianPickerOpen, setGuardianPickerOpen] = useState(false);
   const [pendingGuardians, setPendingGuardians] = useState([]);
   const [gold, setGold] = useState(0);
-  const [inventoryByChar, setInventoryByChar] = useState({}); // char -> [item id]
-  const [equipmentByChar, setEquipmentByChar] = useState({}); // char -> {helmet,body,shoes,sword,shield}
-  const [equipSlotIdx, setEquipSlotIdx] = useState(0); // そうび画面で えらんでいる パーティわく
+  const [inventoryByChar, setInventoryByChar] = useState({}); // char/"hero" -> [item id]
+  const [equipmentByChar, setEquipmentByChar] = useState({}); // char/"hero" -> {helmet,body,shoes,sword,shield}
+  const [equipTarget, setEquipTarget] = useState("hero"); // そうび画面で えらんでいる たいしょう："hero" か パーティのばんごう(0-2)
   const [gradeId, setGradeId] = useState(1);
   const [screen, setScreen] = useState("battle"); // battle | zukan | party | shop
   const [question, setQuestion] = useState(null);
@@ -2191,6 +2245,7 @@ function AppInner() {
           const save = JSON.parse(res.value);
           const p = save.party || [];
           setProgress(save.progress || {});
+          setHeroExp(typeof save.heroExp === "number" ? save.heroExp : 0);
           setParty([p[0] || null, p[1] || null, p[2] || null]);
           setPartySetupDone(!!save.partySetupDone);
           setGold(typeof save.gold === "number" ? save.gold : 0);
@@ -2198,6 +2253,7 @@ function AppInner() {
           setEquipmentByChar(save.equipmentByChar || {});
         } else {
           setProgress({});
+          setHeroExp(0);
           setParty([null, null, null]);
           setPartySetupDone(false);
           setGold(0);
@@ -2240,6 +2296,7 @@ function AppInner() {
       if (!profile) return;
       const payload = {
         progress: partial.progress ?? progress,
+        heroExp: partial.heroExp ?? heroExp,
         party: partial.party ?? party,
         partySetupDone: partial.partySetupDone ?? partySetupDone,
         gold: partial.gold ?? gold,
@@ -2250,7 +2307,7 @@ function AppInner() {
         await window.storage.set(saveKeyFor(profile), JSON.stringify(payload), true);
       } catch (e) {}
     },
-    [profile, progress, party, partySetupDone, gold, inventoryByChar, equipmentByChar]
+    [profile, progress, heroExp, party, partySetupDone, gold, inventoryByChar, equipmentByChar]
   );
 
   const openGuardianPicker = useCallback(() => {
@@ -2286,35 +2343,25 @@ function AppInner() {
   );
   const isCaptured = useCallback((char) => clearedCountOf(char) >= 3, [clearedCountOf]);
 
-  /* --- 出題生成：まだ できていない「漢字×しゅるい」の組から ランダムに1つ（ときどき ふくしゅうも まざる） --- */
+  /* --- 出題生成：まだ できていない「漢字×しゅるい」の組から ランダムに1つ --- */
   const makeQuestion = useCallback(
     (g) => {
       const chars = g.chars;
       const unclearedPairs = [];
-      const capturedChars = [];
       chars.forEach((c) => {
         const p = progress[c];
-        const doneAll = !!(p && p.reading && p.meaning && p.write);
-        if (doneAll) capturedChars.push(c);
         ["reading", "meaning", "write"].forEach((m) => {
           if (!(p && p[m])) unclearedPairs.push([c, m]);
         });
       });
 
       let char, mode;
-      const wantsReview = capturedChars.length > 0 && Math.random() < 0.18;
-      if (wantsReview) {
-        // なかまに した モンスターの ふくしゅう（けいけんちが たまり続けるように）
-        char = capturedChars[Math.floor(Math.random() * capturedChars.length)];
-        mode = ["reading", "meaning", "write"][Math.floor(Math.random() * 3)];
-      } else if (unclearedPairs.length > 0) {
+      if (unclearedPairs.length > 0) {
         const pick = unclearedPairs[Math.floor(Math.random() * unclearedPairs.length)];
         char = pick[0];
         mode = pick[1];
-      } else if (capturedChars.length > 0) {
-        char = capturedChars[Math.floor(Math.random() * capturedChars.length)];
-        mode = ["reading", "meaning", "write"][Math.floor(Math.random() * 3)];
       } else {
+        // その学年は ぜんぶ マスターずみ：ランダムに 出題
         char = chars[Math.floor(Math.random() * chars.length)];
         mode = ["reading", "meaning", "write"][Math.floor(Math.random() * 3)];
       }
@@ -2370,23 +2417,26 @@ function AppInner() {
 
   const grantSuccess = useCallback(
     (char, mode) => {
-      const prev = progress[char] || { reading: false, meaning: false, write: false, exp: 0, level: 0 };
+      const prev = progress[char] || { reading: false, meaning: false, write: false };
       const wasCaptured = prev.reading && prev.meaning && prev.write;
-      const newExp = prev.exp + EXP_PER_ANSWER;
-      const newLevel = levelFromExp(newExp);
-      const updated = { ...prev, [mode]: true, exp: newExp, level: newLevel };
+      const updated = { ...prev, [mode]: true };
       const nowCaptured = updated.reading && updated.meaning && updated.write;
       const nextProgress = { ...progress, [char]: updated };
       setProgress(nextProgress);
 
+      const prevHeroLevel = heroLevelFromExp(heroExp);
+      const newHeroExp = heroExp + HERO_EXP_PER_ANSWER;
+      const newHeroLevel = heroLevelFromExp(newHeroExp);
+      setHeroExp(newHeroExp);
+
       let goldEarned = GOLD_PER_ANSWER;
-      if (newLevel > prev.level) goldEarned += GOLD_LEVEL_BONUS;
+      if (newHeroLevel > prevHeroLevel) goldEarned += GOLD_LEVEL_BONUS;
       if (!wasCaptured && nowCaptured) goldEarned += GOLD_CAPTURE_BONUS;
       const newGold = gold + goldEarned;
       setGold(newGold);
       setGoldNote(goldEarned);
 
-      persistAll({ progress: nextProgress, gold: newGold });
+      persistAll({ progress: nextProgress, gold: newGold, heroExp: newHeroExp });
 
       if (!wasCaptured && nowCaptured) {
         setResultBanner("captured");
@@ -2395,11 +2445,11 @@ function AppInner() {
       } else {
         setResultBanner("partial");
       }
-      if (newLevel > prev.level) {
-        setLevelUpNote(`⭐ Lv.${newLevel} に レベルアップ！`);
+      if (newHeroLevel > prevHeroLevel) {
+        setLevelUpNote(`⭐ ゆうしゃが Lv.${newHeroLevel} に レベルアップ！`);
       }
     },
-    [progress, gold, persistAll]
+    [progress, heroExp, gold, persistAll]
   );
 
   const onAnswer = useCallback(
@@ -2481,11 +2531,16 @@ function AppInner() {
     return stats;
   }
 
-  const equipSlotChar = party[equipSlotIdx];
+  const equipSlotChar = equipTarget === "hero" ? "hero" : party[equipTarget];
   const equipSlotStats = useMemo(() => (equipSlotChar ? statsForChar(equipSlotChar) : { atk: 0, def: 0, spd: 0, wis: 0 }), [
     equipSlotChar,
     equipmentByChar,
   ]);
+  const heroLevel = useMemo(() => heroLevelFromExp(heroExp), [heroExp]);
+  const heroLevelStart = useMemo(() => heroExpForLevel(heroLevel), [heroLevel]);
+  const heroLevelEnd = useMemo(() => heroExpForLevel(Math.min(HERO_MAX_LEVEL, heroLevel + 1)), [heroLevel]);
+  const heroLevelProgress =
+    heroLevel >= HERO_MAX_LEVEL ? 100 : Math.max(0, Math.min(100, ((heroExp - heroLevelStart) / Math.max(1, heroLevelEnd - heroLevelStart)) * 100));
 
   const totalCaptured = Object.keys(progress).filter((c) => isCaptured(c)).length;
   const totalAll = Object.keys(KANJI_DB).length;
@@ -2623,6 +2678,7 @@ function AppInner() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={styles.goldPill}>⭐Lv.{heroLevel}</div>
             <div style={styles.goldPill}>🪙 {gold}</div>
             <button style={styles.partyHeaderBtn} onClick={() => setScreen("party")}>
               <span style={{ fontSize: 15 }}>🎒</span>
@@ -2698,7 +2754,6 @@ function AppInner() {
             <MonsterCreature
               char={question.char}
               clearedCount={clearedCountOf(question.char)}
-              level={progress[question.char] ? progress[question.char].level : 1}
               size={140}
               pop={resultBanner === "captured"}
             />
@@ -2820,11 +2875,11 @@ function AppInner() {
                         }}
                       >
                         {inParty && <div style={styles.partyBadge}>🎒</div>}
-                        <MonsterCreature char={c} clearedCount={n} level={isCap ? progress[c].level : 1} size={64} />
+                        <MonsterCreature char={c} clearedCount={n} size={64} />
                         <div style={styles.zukanCardLabel}>{revealed ? c : "？？？"}</div>
                         <div style={styles.zukanCardReading}>{revealed ? readingsText : "？"}</div>
                         <MiniChecklist status={progress[c]} />
-                        {isCap && <div style={styles.zukanCardType}>Lv.{progress[c].level}</div>}
+                        {isCap && <div style={styles.zukanCardType}>✅ マスター</div>}
                       </button>
                     );
                   })}
@@ -2841,6 +2896,24 @@ function AppInner() {
           <button style={styles.backLink} onClick={() => setScreen("battle")}>
             ← もどる
           </button>
+
+          <div style={styles.wildLabel}>あなたの ゆうしゃ</div>
+          <div style={styles.heroPartyCard}>
+            <HeroAvatar equipped={equipmentByChar.hero || {}} size={130} level={heroLevel} />
+            <LevelBadge level={heroLevel} />
+            <div style={styles.expBarBg}>
+              <div style={{ ...styles.expBarFill, width: `${heroLevelProgress}%` }} />
+            </div>
+            <div style={{ fontSize: 11, opacity: 0.7 }}>
+              {heroLevel >= HERO_MAX_LEVEL
+                ? "ぜんかんじ マスター！さいだいレベルに とうたつ！"
+                : `つぎの Lv.${heroLevel + 1} まで けいけんち ${Math.max(0, heroLevelEnd - heroExp)}`}
+            </div>
+            <button style={styles.miniBtn} onClick={() => setScreen("shop")}>
+              🛡 そうびを かえる
+            </button>
+          </div>
+
           <div style={styles.wildLabel}>あなたの 四神パーティ</div>
 
           <div style={styles.partySlotRow}>
@@ -2874,15 +2947,27 @@ function AppInner() {
       {/* ---------- そうび／おみせ ---------- */}
       {screen === "shop" && (
         <main style={styles.zukanArea}>
-          <div style={styles.wildLabel}>そうびする パーティの モンスターを えらんでね</div>
-          <div style={styles.partySlotRow}>
+          <div style={styles.wildLabel}>そうびする キャラクターを えらんでね</div>
+          <div style={styles.partySlotRow4}>
+            <button
+              onClick={() => setEquipTarget("hero")}
+              style={{
+                ...styles.partySlotCard,
+                cursor: "pointer",
+                ...(equipTarget === "hero" ? styles.partySlotCardActive : {}),
+              }}
+            >
+              <div style={styles.partySlotLabel}>ゆうしゃ</div>
+              <HeroAvatar equipped={equipmentByChar.hero || {}} size={48} level={heroLevel} />
+              <div style={styles.zukanCardLabel}>Lv.{heroLevel}</div>
+            </button>
             {[0, 1, 2].map((i) => {
               const c = party[i];
-              const active = i === equipSlotIdx;
+              const active = equipTarget === i;
               return (
                 <button
                   key={i}
-                  onClick={() => setEquipSlotIdx(i)}
+                  onClick={() => setEquipTarget(i)}
                   style={{
                     ...styles.partySlotCard,
                     cursor: "pointer",
@@ -2892,7 +2977,7 @@ function AppInner() {
                   <div style={styles.partySlotLabel}>スロット{i + 1}</div>
                   {c ? (
                     <>
-                      <GuardianCreature guardianId={c} size={54} equipment={equipmentByChar[c]} />
+                      <GuardianCreature guardianId={c} size={48} equipment={equipmentByChar[c]} />
                       <div style={styles.zukanCardLabel}>{guardianById(c)?.name}</div>
                     </>
                   ) : (
@@ -2915,8 +3000,14 @@ function AppInner() {
           ) : (
             <>
               <div style={styles.shopHeroWrap}>
-                <GuardianCreature guardianId={equipSlotChar} size={130} equipment={equipmentByChar[equipSlotChar]} />
-                <div style={styles.zukanCardLabel}>{guardianById(equipSlotChar)?.name}</div>
+                {equipSlotChar === "hero" ? (
+                  <HeroAvatar equipped={equipmentByChar.hero || {}} size={130} level={heroLevel} />
+                ) : (
+                  <GuardianCreature guardianId={equipSlotChar} size={130} equipment={equipmentByChar[equipSlotChar]} />
+                )}
+                <div style={styles.zukanCardLabel}>
+                  {equipSlotChar === "hero" ? `ゆうしゃ（Lv.${heroLevel}）` : guardianById(equipSlotChar)?.name}
+                </div>
                 <div style={styles.goldPillBig}>🪙 {gold} G</div>
                 <div style={styles.statsPanel}>
                   <div style={styles.statChip}>⚔ こうげきりょく {equipSlotStats.atk}</div>
@@ -2977,22 +3068,10 @@ function AppInner() {
               ×
             </button>
             {party.includes(detail) && <div style={styles.modalPartyTag}>🎒 パーティに セットちゅう</div>}
-            <MonsterCreature char={detail} clearedCount={3} level={progress[detail].level} size={120} />
-            <LevelBadge level={progress[detail].level} />
+            <MonsterCreature char={detail} clearedCount={3} size={120} />
+            <div style={styles.levelBadge}>✅ マスターずみ</div>
             <div style={styles.modalType}>{TYPE_META[KANJI_DB[detail].type].name} タイプ</div>
             <div style={styles.modalKanji}>{detail}</div>
-            <div style={styles.expBarBg}>
-              <div
-                style={{
-                  ...styles.expBarFill,
-                  width: `${
-                    progress[detail].level >= MAX_LEVEL
-                      ? 100
-                      : ((progress[detail].exp % EXP_PER_LEVEL) / EXP_PER_LEVEL) * 100
-                  }%`,
-                }}
-              />
-            </div>
             <div style={styles.modalRow}>
               <span style={styles.modalLabel}>よみかた</span>
               <span>{[...KANJI_DB[detail].on, ...KANJI_DB[detail].kun].join("　") || "－"}</span>
@@ -3276,6 +3355,18 @@ const styles = {
   zukanCard: { position: "relative", background: "#211f47", border: "1px solid #3c3970", borderRadius: 14, padding: "8px 2px 6px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, cursor: "pointer" },
   zukanCardInParty: { borderColor: "#ffd37a", boxShadow: "0 0 0 2px #ffd37a66", background: "#2c2650" },
   partySlotRow: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 18 },
+  partySlotRow4: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 18 },
+  heroPartyCard: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 6,
+    background: "linear-gradient(160deg,#2a2758,#1b1a3a)",
+    border: "1px solid #423f78",
+    borderRadius: 20,
+    padding: "16px 16px 14px",
+    marginBottom: 18,
+  },
   partySlotCard: {
     background: "#211f47",
     border: "1px solid #3c3970",

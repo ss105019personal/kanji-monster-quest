@@ -3973,7 +3973,7 @@ function GlobalStyle() {
         100% { transform: rotate(360deg) scale(0.9); opacity: 0.5; }
       }
       .evolve-ring { animation: evolveSparkleSpin 1.8s linear infinite; }
-      button { font-family: inherit; }
+      button { font-family: inherit; color: inherit; }
       button:focus-visible { outline: 3px solid #ffd37a; outline-offset: 2px; }
       @media (prefers-reduced-motion: reduce) {
         .monster-pop { animation: none !important; }
@@ -4209,6 +4209,7 @@ const styles = {
     alignItems: "center",
     gap: 4,
     textAlign: "center",
+    color: "#f1eefc",
   },
   certCardWon: { borderColor: "#ffd37a", boxShadow: "0 0 0 2px #ffd37a55" },
   certLocked: { fontSize: 40, opacity: 0.3, height: 72, display: "flex", alignItems: "center", justifyContent: "center" },
@@ -4313,7 +4314,7 @@ const styles = {
   zukanAreaHeader: { display: "flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 800, marginBottom: 8, opacity: 0.9 },
   areaDot: { width: 10, height: 10, borderRadius: "50%", display: "inline-block" },
   zukanGrid: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 },
-  zukanCard: { position: "relative", background: "#211f47", border: "1px solid #3c3970", borderRadius: 14, padding: "8px 2px 6px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, cursor: "pointer" },
+  zukanCard: { position: "relative", background: "#211f47", border: "1px solid #3c3970", borderRadius: 14, padding: "8px 2px 6px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, cursor: "pointer", color: "#f1eefc" },
   zukanCardInParty: { borderColor: "#ffd37a", boxShadow: "0 0 0 2px #ffd37a66", background: "#2c2650" },
   partySlotRow: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 18 },
   partySlotRow4: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 18 },
@@ -4355,6 +4356,7 @@ const styles = {
     gap: 4,
     minHeight: 96,
     justifyContent: "center",
+    color: "#f1eefc",
   },
   partySlotCardActive: { borderColor: "#ffd37a", boxShadow: "0 0 0 2px #ffd37a66", background: "#2c2650" },
   partySlotLabel: { fontSize: 10, opacity: 0.7, fontWeight: 700 },

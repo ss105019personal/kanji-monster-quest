@@ -1698,46 +1698,76 @@ const EQUIP_ANCHORS = {
   },
 };
 
-function EquipHelmet({ x, y, rot, color }) {
+function EquipHelmet({ x, y, rot, color, tierIdx = 0 }) {
+  const s = 1 + Math.min(tierIdx, 8) * 0.045;
   return (
-    <g transform={`translate(${x},${y}) rotate(${rot})`}>
+    <g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`}>
       <path d="M-13,4 C-13,-11 13,-11 13,4 L13,9 L-13,9 Z" fill={color} stroke={OUTLINE} strokeWidth="2.2" />
       <circle cx="0" cy="-9" r="3.2" fill={color} stroke={OUTLINE} strokeWidth="1.6" />
+      {tierIdx >= 4 && <circle cx="0" cy="2" r="1.8" fill={TIER_ACCENT(tierIdx)} stroke={OUTLINE} strokeWidth="1" />}
+      {tierIdx >= 7 && (
+        <g fill="#e0392b" stroke={OUTLINE} strokeWidth="1">
+          <polygon points="-13,4 -17,-4 -8,-2" />
+          <polygon points="13,4 17,-4 8,-2" />
+        </g>
+      )}
     </g>
   );
 }
 
-function EquipBody({ x, y, rot, color }) {
+function EquipBody({ x, y, rot, color, tierIdx = 0 }) {
+  const s = 1 + Math.min(tierIdx, 8) * 0.04;
   return (
-    <g transform={`translate(${x},${y}) rotate(${rot})`}>
+    <g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`}>
       <path d="M-17,-8 L17,-8 L13,22 L-13,22 Z" fill={color} stroke={OUTLINE} strokeWidth="2.2" opacity="0.92" />
       <path d="M-17,-8 L0,2 L17,-8" fill="none" stroke={OUTLINE} strokeWidth="1.6" opacity="0.5" />
+      {tierIdx >= 4 && <polygon points="0,4 3,8 0,12 -3,8" fill={TIER_ACCENT(tierIdx)} stroke={OUTLINE} strokeWidth="1" />}
+      {tierIdx >= 6 && <path d="M-17,-8 L17,-8" stroke="#fff6d5" strokeWidth="1.6" opacity="0.7" />}
     </g>
   );
 }
 
-function EquipShoe({ x, y, rot, color }) {
+function EquipShoe({ x, y, rot, color, tierIdx = 0 }) {
+  const s = 1 + Math.min(tierIdx, 8) * 0.04;
   return (
-    <g transform={`translate(${x},${y}) rotate(${rot})`}>
+    <g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`}>
       <rect x="-8" y="-5" width="16" height="11" rx="4" fill={color} stroke={OUTLINE} strokeWidth="2" />
+      {tierIdx >= 7 && <polygon points="-8,-3 -13,-7 -8,-8" fill="#e0392b" stroke={OUTLINE} strokeWidth="1" />}
     </g>
   );
 }
 
-function EquipSword({ x, y, rot, color }) {
+function EquipSword({ x, y, rot, color, tierIdx = 0 }) {
+  const s = 1 + Math.min(tierIdx, 8) * 0.05;
   return (
-    <g transform={`translate(${x},${y}) rotate(${rot})`}>
+    <g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`}>
       <rect x="-2.6" y="-24" width="5.2" height="28" rx="1.6" fill={color} stroke={OUTLINE} strokeWidth="1.8" />
       <rect x="-9" y="2" width="18" height="4.4" rx="1.6" fill="#e8c34a" stroke={OUTLINE} strokeWidth="1.3" />
       <rect x="-2.2" y="6.4" width="4.4" height="9" rx="1.6" fill="#4a3420" stroke={OUTLINE} strokeWidth="1.3" />
+      {tierIdx >= 4 && <circle cx="0" cy="4" r="1.6" fill={TIER_ACCENT(tierIdx)} stroke={OUTLINE} strokeWidth="0.8" />}
+      {tierIdx >= 6 && <rect x="-2.6" y="-24" width="2" height="28" fill="#fff6d5" opacity="0.5" />}
+      {tierIdx >= 8 && (
+        <g fill="#fff6d5">
+          <circle cx="-5" cy="-26" r="1.4" />
+          <circle cx="5" cy="-30" r="1" />
+        </g>
+      )}
     </g>
   );
 }
 
-function EquipShield({ x, y, rot, color }) {
+function EquipShield({ x, y, rot, color, tierIdx = 0 }) {
+  const s = 1 + Math.min(tierIdx, 8) * 0.045;
   return (
-    <g transform={`translate(${x},${y}) rotate(${rot})`}>
+    <g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`}>
       <path d="M-11,-15 L11,-15 L13,4 L0,17 L-13,4 Z" fill={color} stroke={OUTLINE} strokeWidth="2.2" />
+      {tierIdx >= 4 && <circle cx="0" cy="0" r="2.6" fill={TIER_ACCENT(tierIdx)} stroke={OUTLINE} strokeWidth="1" />}
+      {tierIdx >= 7 && (
+        <g fill="#e0392b" stroke={OUTLINE} strokeWidth="0.9">
+          <polygon points="-11,-15 -15,-19 -8,-18" />
+          <polygon points="11,-15 15,-19 8,-18" />
+        </g>
+      )}
     </g>
   );
 }
@@ -1752,12 +1782,22 @@ function GuardianEquipment({ archetype, equipment }) {
   const shield = equipment.shield && itemById("shield", equipment.shield);
   return (
     <>
-      {shield && <EquipShield x={a.shield.x} y={a.shield.y} rot={a.shield.rot} color={shield.color} />}
-      {body && <EquipBody x={a.body.x} y={a.body.y} rot={a.body.rot} color={body.color} />}
-      {shoes && <EquipShoe x={a.shoeA.x} y={a.shoeA.y} rot={a.shoeA.rot} color={shoes.color} />}
-      {shoes && <EquipShoe x={a.shoeB.x} y={a.shoeB.y} rot={a.shoeB.rot} color={shoes.color} />}
-      {helmet && <EquipHelmet x={a.helmet.x} y={a.helmet.y} rot={a.helmet.rot} color={helmet.color} />}
-      {sword && <EquipSword x={a.sword.x} y={a.sword.y} rot={a.sword.rot} color={sword.color} />}
+      {shield && (
+        <EquipShield x={a.shield.x} y={a.shield.y} rot={a.shield.rot} color={shield.color} tierIdx={equipTierIndex("shield", shield.id)} />
+      )}
+      {body && <EquipBody x={a.body.x} y={a.body.y} rot={a.body.rot} color={body.color} tierIdx={equipTierIndex("body", body.id)} />}
+      {shoes && (
+        <EquipShoe x={a.shoeA.x} y={a.shoeA.y} rot={a.shoeA.rot} color={shoes.color} tierIdx={equipTierIndex("shoes", shoes.id)} />
+      )}
+      {shoes && (
+        <EquipShoe x={a.shoeB.x} y={a.shoeB.y} rot={a.shoeB.rot} color={shoes.color} tierIdx={equipTierIndex("shoes", shoes.id)} />
+      )}
+      {helmet && (
+        <EquipHelmet x={a.helmet.x} y={a.helmet.y} rot={a.helmet.rot} color={helmet.color} tierIdx={equipTierIndex("helmet", helmet.id)} />
+      )}
+      {sword && (
+        <EquipSword x={a.sword.x} y={a.sword.y} rot={a.sword.rot} color={sword.color} tierIdx={equipTierIndex("sword", sword.id)} />
+      )}
     </>
   );
 }
@@ -2242,6 +2282,13 @@ function itemById(slot, id) {
   return EQUIPMENT[slot].find((it) => it.id === id) || null;
 }
 
+function equipTierIndex(slot, id) {
+  return EQUIPMENT[slot].findIndex((it) => it.id === id);
+}
+
+const TIER_SPIKE_COUNTS = [0, 0, 1, 2, 2, 3, 3, 4, 5];
+const TIER_ACCENT = (idx) => (idx >= 8 ? "#fff6d5" : idx >= 7 ? "#e0392b" : idx >= 4 ? "#5be3ff" : "#ffd24d");
+
 function statsLabel(item) {
   const parts = [];
   if (item.atk) parts.push(`⚔${item.atk}`);
@@ -2481,6 +2528,118 @@ function HeroSparkles({ count }) {
   );
 }
 
+function HelmetDecor({ tierIdx }) {
+  if (tierIdx < 2) return null;
+  const accent = TIER_ACCENT(tierIdx);
+  const dragonHorns = tierIdx >= 7;
+  return (
+    <g>
+      <g fill={dragonHorns ? "#e0392b" : accent} stroke={OUTLINE} strokeWidth="1.6">
+        {dragonHorns ? (
+          <>
+            <path d="M46,10 C38,-6 44,-20 54,-13 C50,-2 48,5 46,10 Z" />
+            <path d="M94,10 C102,-6 96,-20 86,-13 C90,-2 92,5 94,10 Z" />
+          </>
+        ) : (
+          <>
+            <path d="M48,8 L43,-8 L55,3 Z" />
+            <path d="M92,8 L97,-8 L85,3 Z" />
+          </>
+        )}
+      </g>
+      {tierIdx >= 4 && (
+        <polygon points="70,16 74,21 70,26 66,21" fill={tierIdx >= 8 ? "#fff6d5" : "#5be3ff"} stroke={OUTLINE} strokeWidth="1.2" />
+      )}
+      {tierIdx >= 6 && (
+        <path
+          d="M48,13 C48,-9 92,-9 92,13"
+          fill="none"
+          stroke={tierIdx >= 8 ? "#fff6d5" : "#ffe9a8"}
+          strokeWidth="1.6"
+          strokeDasharray="3 3"
+          opacity="0.85"
+        />
+      )}
+      {tierIdx >= 8 && <ellipse cx="70" cy="-33" rx="17" ry="5" fill="none" stroke="#fff6d5" strokeWidth="2.2" opacity="0.85" />}
+    </g>
+  );
+}
+
+function SwordDecor({ tierIdx }) {
+  if (tierIdx < 2) return null;
+  return (
+    <g>
+      {tierIdx >= 4 && (
+        <circle cx="103" cy="116" r="2.6" fill={tierIdx >= 8 ? "#fff6d5" : "#5be3ff"} stroke={OUTLINE} strokeWidth="1" />
+      )}
+      {tierIdx >= 6 && <polygon points="96,116 112,110 138,18 133,16" fill="#fff6d5" opacity="0.45" />}
+      {tierIdx >= 7 && (
+        <g fill="#e0392b" stroke={OUTLINE} strokeWidth="0.9">
+          <polygon points="118,72 124,69 121,78" />
+          <polygon points="127,45 133,42 130,51" />
+        </g>
+      )}
+      {tierIdx >= 8 && (
+        <g fill="#fff6d5">
+          <circle cx="141" cy="13" r="2.2" />
+          <circle cx="147" cy="21" r="1.4" />
+          <circle cx="134" cy="24" r="1.4" />
+        </g>
+      )}
+    </g>
+  );
+}
+
+function ShieldDecor({ tierIdx }) {
+  if (tierIdx < 2) return null;
+  return (
+    <g>
+      {tierIdx >= 4 && <circle cx="20" cy="90" r="3.6" fill={tierIdx >= 8 ? "#fff6d5" : "#ffd24d"} stroke={OUTLINE} strokeWidth="1.3" />}
+      {tierIdx >= 7 && (
+        <g fill="#e0392b" stroke={OUTLINE} strokeWidth="1.1">
+          <polygon points="6,72 1,63 12,67" />
+          <polygon points="36,104 45,102 38,113" />
+        </g>
+      )}
+      {tierIdx >= 8 && (
+        <path d="M6,72 L30,66 L36,104 L20,132 L4,104 Z" fill="none" stroke="#fff6d5" strokeWidth="2" opacity="0.65" />
+      )}
+    </g>
+  );
+}
+
+function BodyDecor({ tierIdx }) {
+  if (tierIdx < 2) return null;
+  return (
+    <g>
+      {tierIdx >= 6 && <path d="M42,64 L98,64" stroke="#fff6d5" strokeWidth="2" opacity="0.55" />}
+      {tierIdx >= 7 && (
+        <g fill="#e0392b" stroke={OUTLINE} strokeWidth="1.3">
+          <polygon points="42,64 34,54 47,58" />
+          <polygon points="98,64 106,54 93,58" />
+        </g>
+      )}
+    </g>
+  );
+}
+
+function ShoeDecor({ tierIdx, x }) {
+  if (tierIdx < 2) return null;
+  return (
+    <g>
+      <rect x={x + 2} y="170" width="18" height="3" rx="1.5" fill="#2a2020" opacity="0.6" />
+      {tierIdx >= 7 && (
+        <path
+          d={`M${x - 1},172 C${x - 11},167 ${x - 12},158 ${x - 5},155 C${x - 6},163 ${x - 4},168 ${x - 1},172 Z`}
+          fill="#e0392b"
+          stroke={OUTLINE}
+          strokeWidth="1"
+        />
+      )}
+    </g>
+  );
+}
+
 function HeroAvatar({ equipped, size = 150, level = 1 }) {
   const tier = heroTierFromLevel(level);
   const cfg = HERO_TIER_CONFIG[tier];
@@ -2489,6 +2648,11 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
   const shoes = equipped.shoes && itemById("shoes", equipped.shoes);
   const sword = equipped.sword && itemById("sword", equipped.sword);
   const shield = equipped.shield && itemById("shield", equipped.shield);
+  const helmetTier = helmet ? equipTierIndex("helmet", helmet.id) : -1;
+  const bodyTier = body ? equipTierIndex("body", body.id) : -1;
+  const shoesTier = shoes ? equipTierIndex("shoes", shoes.id) : -1;
+  const swordTier = sword ? equipTierIndex("sword", sword.id) : -1;
+  const shieldTier = shield ? equipTierIndex("shield", shield.id) : -1;
 
   const armorColor = body ? body.color : "#6b6878";
   const bootColor = shoes ? shoes.color : "#45424f";
@@ -2520,12 +2684,15 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
         <path d="M6,72 L30,66 L36,104 L20,132 L4,104 Z" fill={shield.color} stroke={OUTLINE} strokeWidth="3" />
       )}
       {shield && <path d="M20,74 L20,120 M10,90 L30,90" stroke={OUTLINE} strokeWidth="1.5" opacity="0.5" />}
+      {shield && <ShieldDecor tierIdx={shieldTier} />}
 
       {/* あし（よろい） */}
       <path d="M48,120 L60,120 L57,168 L43,168 Z" fill={armorColor} stroke={OUTLINE} strokeWidth="2.5" />
       <path d="M80,120 L92,120 L97,168 L83,168 Z" fill={armorColor} stroke={OUTLINE} strokeWidth="2.5" />
       <rect x="38" y="164" width="22" height="18" rx="5" fill={bootColor} stroke={OUTLINE} strokeWidth="2.5" />
       <rect x="80" y="164" width="22" height="18" rx="5" fill={bootColor} stroke={OUTLINE} strokeWidth="2.5" />
+      {shoes && <ShoeDecor tierIdx={shoesTier} x={38} />}
+      {shoes && <ShoeDecor tierIdx={shoesTier} x={80} />}
 
       {/* ベルト */}
       <rect x="46" y="114" width="48" height="9" rx="2" fill="#3a2a1a" stroke={OUTLINE} strokeWidth="2" />
@@ -2538,7 +2705,13 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
         stroke={OUTLINE}
         strokeWidth="3.5"
       />
-      <polygon points="70,84 78,94 70,104 62,94" fill="#e8c34a" stroke={OUTLINE} strokeWidth="2" />
+      <polygon
+        points="70,84 78,94 70,104 62,94"
+        fill={bodyTier >= 8 ? "#fff6d5" : bodyTier >= 4 ? "#5be3ff" : "#e8c34a"}
+        stroke={OUTLINE}
+        strokeWidth="2"
+      />
+      {body && <BodyDecor tierIdx={bodyTier} />}
 
       {/* あたま（やさしい ひょうじょう・かみのけ なし） */}
       <ellipse cx="70" cy="38" rx="18" ry="20" fill="#f0bd8e" stroke={OUTLINE} strokeWidth="3" />
@@ -2564,6 +2737,7 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
           />
           <rect x="46" y="23" width="48" height="7" rx="3" fill="#1c1a24" stroke={OUTLINE} strokeWidth="2" />
           <polygon points="66,-9 70,-27 74,-9" fill="#e8483a" stroke={OUTLINE} strokeWidth="2" />
+          <HelmetDecor tierIdx={helmetTier} />
         </g>
       )}
 
@@ -2578,6 +2752,7 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
           <circle cx="103" cy="142" r="6" fill="#e8c34a" stroke={OUTLINE} strokeWidth="1.5" />
           <rect x="88" y="112" width="30" height="8" rx="2" fill="#8a8f99" stroke={OUTLINE} strokeWidth="2" transform="rotate(-8 103 116)" />
           <polygon points="96,116 112,110 138,18 128,14 108,104" fill={sword.color} stroke={OUTLINE} strokeWidth="2.5" />
+          <SwordDecor tierIdx={swordTier} />
         </g>
       )}
 

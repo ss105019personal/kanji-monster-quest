@@ -1774,6 +1774,71 @@ function GuardianCreature({ guardianId, size = 140, pop = false, equipment = nul
   );
 }
 
+/* ================================================================== */
+/* がくねん マスターボス（その学年を ぜんぶ 金色に したら あらわれる）  */
+/* ================================================================== */
+
+const BOSSES = [
+  { grade: 1, name: "みどりの ぬし", colorA: "#8FCB4E", colorB: "#2F5E1C", accent: "#DDF2B4" },
+  { grade: 2, name: "あらしの まおう", colorA: "#A692E8", colorB: "#4F5FB8", accent: "#E7E2FF" },
+  { grade: 3, name: "だいちの きょじん", colorA: "#D3A45E", colorB: "#7A4E27", accent: "#F1DDB0" },
+  { grade: 4, name: "ごうかの りゅう", colorA: "#FF7A50", colorB: "#B5301A", accent: "#FFD37A" },
+  { grade: 5, name: "しんかいの ぬし", colorA: "#57C7F5", colorB: "#0C5C8C", accent: "#BFEFFF" },
+  { grade: 6, name: "かんじの まおう", colorA: "#B26FE0", colorB: "#3a1a52", accent: "#F4DFFF" },
+];
+function bossForGrade(gradeId) {
+  return BOSSES.find((b) => b.grade === gradeId);
+}
+
+const BOSS_ROUNDS = 5;
+const BOSS_LIVES = 3;
+const BOSS_WIN_GOLD = 200;
+
+function BossCreature({ boss, size = 180 }) {
+  const spine = "M10,95 C5,55 30,15 65,18 C95,20 100,55 70,62 C42,68 48,100 75,105 C105,110 130,85 132,50";
+  return (
+    <svg viewBox="0 0 150 150" width={size} height={size} style={{ overflow: "visible" }}>
+      <circle cx="75" cy="75" r="92" fill={boss.colorA} opacity="0.18" />
+      <path d={spine} fill="none" stroke={OUTLINE} strokeWidth="30" strokeLinecap="round" />
+      <path d={spine} fill="none" stroke={boss.colorA} strokeWidth="23" strokeLinecap="round" />
+      <path d={spine} fill="none" stroke={boss.colorB} strokeWidth="6" strokeLinecap="round" opacity="0.5" strokeDasharray="1 16" />
+      <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="2.2">
+        <polygon points="55,25 62,6 68,26" />
+        <polygon points="70,20 78,2 84,22" />
+        <polygon points="40,68 47,50 53,70" />
+        <polygon points="60,86 66,70 71,88" />
+      </g>
+      <g>
+        <path d="M118,35 C138,27 152,38 148,53 C143,65 126,63 115,50 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+        <path d="M122,26 C118,8 129,0 136,9 C131,17 126,24 122,26 Z" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+        <path d="M133,26 C138,8 151,3 155,12 C148,19 141,25 133,26 Z" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+        <circle cx="131" cy="45" r="4.2" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.6" />
+        <circle cx="132.2" cy="44.1" r="1.4" fill="#fff" />
+        <path d="M139,53 L149,57 L139,62" fill="none" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
+        <polygon points="135,55 138,61 132,59" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+      </g>
+    </svg>
+  );
+}
+
+function makeBossQuestion(g) {
+  const chars = g.chars;
+  const char = chars[Math.floor(Math.random() * chars.length)];
+  const entry = KANJI_DB[char];
+  const mode = Math.random() < 0.5 ? "reading" : "meaning";
+  let correct, distractorPool;
+  if (mode === "reading") {
+    correct = entry.kun.length ? entry.kun[0] : entry.on[0];
+    distractorPool = chars.filter((c) => c !== char).flatMap((c) => [...KANJI_DB[c].kun, ...KANJI_DB[c].on]);
+  } else {
+    correct = entry.meaning;
+    distractorPool = chars.filter((c) => c !== char).map((c) => KANJI_DB[c].meaning);
+  }
+  const distractors = shuffle([...new Set(distractorPool)]).slice(0, 3);
+  const choices = shuffle([correct, ...distractors]);
+  return { char, entry, mode, choices, correctIdx: choices.indexOf(correct) };
+}
+
 function MonsterCreature({ char, clearedCount = 0, level = 1, size = 140, pop = false }) {
   const meta = TYPE_META[(KANJI_DB[char] || {}).type] || TYPE_META.spirit;
   const captured = clearedCount >= 3;
@@ -2426,7 +2491,9 @@ function AppInner() {
   const [equipmentByChar, setEquipmentByChar] = useState({}); // char/"hero" -> {helmet,body,shoes,sword,shield}
   const [equipTarget, setEquipTarget] = useState("hero"); // そうび画面で えらんでいる たいしょう："hero" か パーティのばんごう(0-2)
   const [gradeId, setGradeId] = useState(1);
-  const [screen, setScreen] = useState("battle"); // battle | zukan | party | shop
+  const [screen, setScreen] = useState("battle"); // battle | zukan | party | shop | certificates
+  const [bossDefeated, setBossDefeated] = useState({}); // { [gradeId]: true }
+  const [boss, setBoss] = useState(null); // ボスせん中の じょうたい（null = たたかっていない）
   const [question, setQuestion] = useState(null);
   const [qMode, setQMode] = useState("reading"); // reading | meaning | write
   const [locked, setLocked] = useState(false);
@@ -2469,6 +2536,7 @@ function AppInner() {
           setGold(typeof save.gold === "number" ? save.gold : 0);
           setInventoryByChar(save.inventoryByChar || {});
           setEquipmentByChar(save.equipmentByChar || {});
+          setBossDefeated(save.bossDefeated || {});
         } else {
           setProgress({});
           setHeroExp(0);
@@ -2477,6 +2545,7 @@ function AppInner() {
           setGold(0);
           setInventoryByChar({});
           setEquipmentByChar({});
+          setBossDefeated({});
         }
       } catch (e) {}
       setLoaded(true);
@@ -2520,12 +2589,13 @@ function AppInner() {
         gold: partial.gold ?? gold,
         inventoryByChar: partial.inventoryByChar ?? inventoryByChar,
         equipmentByChar: partial.equipmentByChar ?? equipmentByChar,
+        bossDefeated: partial.bossDefeated ?? bossDefeated,
       };
       try {
         await window.storage.set(saveKeyFor(profile), JSON.stringify(payload), true);
       } catch (e) {}
     },
-    [profile, progress, heroExp, party, partySetupDone, gold, inventoryByChar, equipmentByChar]
+    [profile, progress, heroExp, party, partySetupDone, gold, inventoryByChar, equipmentByChar, bossDefeated]
   );
 
   const openGuardianPicker = useCallback(() => {
@@ -2710,6 +2780,60 @@ function AppInner() {
       nextQuestion();
     }, 900);
   }, [locked, question, nextQuestion]);
+
+  /* --- がくねんマスターボス --- */
+  const gradeFullyMastered = useCallback((g) => g.chars.every((c) => isCaptured(c)), [isCaptured]);
+
+  const startBossFight = useCallback(() => {
+    const q = makeBossQuestion(grade);
+    setBoss({ gradeId, progress: 0, lives: BOSS_LIVES, question: q, locked: false, wrongIdx: null, result: null });
+  }, [grade, gradeId]);
+
+  const closeBossFight = useCallback(() => {
+    setBoss(null);
+  }, []);
+
+  const onBossAnswer = useCallback(
+    (i) => {
+      if (!boss || boss.locked) return;
+      const correct = i === boss.question.correctIdx;
+      if (correct) {
+        const newProgress = boss.progress + 1;
+        if (newProgress >= BOSS_ROUNDS) {
+          const nextBD = { ...bossDefeated, [boss.gradeId]: true };
+          setBossDefeated(nextBD);
+          const newGold = gold + BOSS_WIN_GOLD;
+          setGold(newGold);
+          persistAll({ bossDefeated: nextBD, gold: newGold });
+          setBoss({ ...boss, progress: newProgress, locked: true, result: "win" });
+          return;
+        }
+        setBoss({ ...boss, progress: newProgress, locked: true, wrongIdx: null, result: "hit" });
+        setTimeout(() => {
+          setBoss((prev) => {
+            if (!prev || prev.result !== "hit") return prev;
+            const q = makeBossQuestion(grade);
+            return { ...prev, question: q, locked: false, wrongIdx: null, result: null };
+          });
+        }, 700);
+      } else {
+        const newLives = boss.lives - 1;
+        if (newLives <= 0) {
+          setBoss({ ...boss, lives: newLives, wrongIdx: i, locked: true, result: "lose" });
+          return;
+        }
+        setBoss({ ...boss, lives: newLives, wrongIdx: i, locked: true, result: "miss" });
+        setTimeout(() => {
+          setBoss((prev) => {
+            if (!prev || prev.result !== "miss") return prev;
+            const q = makeBossQuestion(grade);
+            return { ...prev, question: q, locked: false, wrongIdx: null, result: null };
+          });
+        }, 700);
+      }
+    },
+    [boss, bossDefeated, gold, persistAll, grade]
+  );
 
 
   const buyOrEquip = useCallback(
@@ -2906,6 +3030,10 @@ function AppInner() {
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <div style={styles.goldPill}>⭐Lv.{heroLevel}</div>
             <div style={styles.goldPill}>🪙 {gold}</div>
+            <button style={styles.partyHeaderBtn} onClick={() => setScreen("certificates")}>
+              <span style={{ fontSize: 15 }}>🏆</span>
+              <span style={{ fontSize: 11, fontWeight: 800 }}>{Object.keys(bossDefeated).length}/6</span>
+            </button>
             <button style={styles.partyHeaderBtn} onClick={() => setScreen("party")}>
               <span style={{ fontSize: 15 }}>🎒</span>
               <div style={{ display: "flex", gap: 2 }}>
@@ -2970,9 +3098,100 @@ function AppInner() {
         </button>
       </div>
 
-      {/* ---------- バトル（クイズ／かきとり） ---------- */}
-      {screen === "battle" && question && (
+      {/* ---------- バトル（クイズ／かきとり／ボスせん） ---------- */}
+      {screen === "battle" && boss && (
         <main style={styles.quizArea}>
+          <button style={styles.backLink} onClick={closeBossFight}>
+            ← にげる
+          </button>
+          {(() => {
+            const bossData = bossForGrade(boss.gradeId);
+            return (
+              <>
+                <div style={styles.wildLabel}>{grade.label} ／ 🔥 ボスせん 🔥</div>
+                <div style={styles.bossNameText}>{bossData.name}</div>
+                <div style={{ ...styles.monsterCard, ...styles.bossCard }}>
+                  <BossCreature boss={bossData} size={170} />
+                </div>
+                <div style={styles.bossStatusRow}>
+                  <div style={styles.bossLivesRow}>
+                    {Array.from({ length: BOSS_LIVES }).map((_, i) => (
+                      <span key={i} style={{ opacity: i < boss.lives ? 1 : 0.25 }}>
+                        ❤️
+                      </span>
+                    ))}
+                  </div>
+                  <div style={styles.bossProgressRow}>
+                    {Array.from({ length: BOSS_ROUNDS }).map((_, i) => (
+                      <span key={i} style={{ opacity: i < boss.progress ? 1 : 0.25 }}>
+                        ⚔️
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {boss.result === "win" ? (
+                  <div style={styles.bannerWrap}>
+                    <div style={styles.bannerNew}>
+                      🏆 {bossData.name}を たおした！「{grade.label}の しょうじょう」を てにいれた！
+                    </div>
+                    <div style={styles.goldNoteBanner}>🪙 +{BOSS_WIN_GOLD} G ゲット！</div>
+                    <button style={styles.nextBtn} onClick={closeBossFight}>
+                      もどる
+                    </button>
+                  </div>
+                ) : boss.result === "lose" ? (
+                  <div style={styles.bannerWrap}>
+                    <div style={styles.bannerMissed}>ざんねん…！ {bossData.name}に にげられた…また ちょうせんしよう</div>
+                    <button style={styles.nextBtn} onClick={closeBossFight}>
+                      もどる
+                    </button>
+                  </div>
+                ) : boss.result === "hit" ? (
+                  <div style={styles.bannerWrap}>
+                    <div style={styles.bannerReview}>やった！ こうげき せいこう！</div>
+                  </div>
+                ) : boss.result === "miss" ? (
+                  <div style={styles.bannerWrap}>
+                    <div style={styles.bannerMissed}>ざんねん…！ こうげきが はずれた…</div>
+                  </div>
+                ) : (
+                  <>
+                    <div style={styles.questionKanjiBig}>{boss.question.char}</div>
+                    <div style={styles.questionSubtext}>
+                      {boss.question.mode === "reading" ? "の よみかたは どれ？" : "の いみは どれ？"}
+                    </div>
+                    <div style={styles.choiceGrid}>
+                      {boss.question.choices.map((c, i) => (
+                        <button
+                          key={i}
+                          onClick={() => onBossAnswer(i)}
+                          style={{ ...styles.choiceBtn, ...(boss.wrongIdx === i ? styles.choiceBtnWrong : {}) }}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            );
+          })()}
+        </main>
+      )}
+
+      {screen === "battle" && !boss && question && (
+        <main style={styles.quizArea}>
+          {gradeFullyMastered(grade) && (
+            <div style={styles.bossBanner}>
+              <div style={{ fontWeight: 800, fontSize: 13 }}>
+                {bossDefeated[gradeId] ? "🏆 このがくねんの ボスは とうばつずみ！" : `🔥 ${bossForGrade(gradeId).name}が あらわれた！`}
+              </div>
+              <button style={styles.bossChallengeBtn} onClick={startBossFight}>
+                {bossDefeated[gradeId] ? "⚔️ もういちど たおす" : "⚔️ ちょうせんする"}
+              </button>
+            </div>
+          )}
           <div style={styles.wildLabel}>{grade.label} ／ やせいの モンスターが あらわれた！</div>
 
           <div style={{ ...styles.monsterCard, ...(shakeCard ? { animation: "shakeCard 0.4s" } : {}) }}>
@@ -3065,6 +3284,34 @@ function AppInner() {
               </div>
             </>
           )}
+        </main>
+      )}
+
+      {/* ---------- しょうじょう ---------- */}
+      {screen === "certificates" && (
+        <main style={styles.zukanArea}>
+          <button style={styles.backLink} onClick={() => setScreen("battle")}>
+            ← もどる
+          </button>
+          <div style={styles.wildLabel}>ボスを たおして「しょうじょう」を あつめよう</div>
+          <div style={styles.certGrid}>
+            {BOSSES.map((b) => {
+              const won = !!bossDefeated[b.grade];
+              const g = GRADES.find((gr) => gr.id === b.grade);
+              return (
+                <div key={b.grade} style={{ ...styles.certCard, ...(won ? styles.certCardWon : {}) }}>
+                  {won ? (
+                    <BossCreature boss={b} size={72} />
+                  ) : (
+                    <div style={styles.certLocked}>❔</div>
+                  )}
+                  <div style={styles.certGradeLabel}>{g.label}</div>
+                  <div style={styles.certBossName}>{won ? b.name : "？？？"}</div>
+                  <div style={styles.certStatus}>{won ? "🏆 しょうじょう しゅとく！" : "みとうばつ"}</div>
+                </div>
+              );
+            })}
+          </div>
         </main>
       )}
 
@@ -3504,6 +3751,52 @@ const styles = {
   backLink: { alignSelf: "flex-start", background: "none", border: "none", color: "#b8b0ec", fontSize: 12, cursor: "pointer", padding: "4px 0" },
   wildLabel: { fontSize: 12, opacity: 0.75, letterSpacing: "0.02em", textAlign: "center" },
   monsterCard: { position: "relative", background: "linear-gradient(160deg,#2a2758,#1b1a3a)", border: "1px solid #423f78", borderRadius: 24, padding: 16, boxShadow: "0 10px 30px rgba(0,0,0,0.35)" },
+  bossCard: { borderColor: "#ff6b4a", boxShadow: "0 0 0 2px #ff6b4a55, 0 10px 30px rgba(0,0,0,0.4)" },
+  bossNameText: { fontFamily: "'Yusei Magic', sans-serif", fontSize: 16, color: "#ff9a7a", textAlign: "center" },
+  bossStatusRow: { display: "flex", justifyContent: "space-between", width: "100%", maxWidth: 260, fontSize: 16, margin: "2px 0" },
+  bossLivesRow: { display: "flex", gap: 4 },
+  bossProgressRow: { display: "flex", gap: 4 },
+  bossBanner: {
+    width: "100%",
+    maxWidth: 320,
+    background: "linear-gradient(160deg,#3a1a1a,#2a1010)",
+    border: "1px solid #ff6b4a",
+    borderRadius: 16,
+    padding: "10px 14px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    marginBottom: 6,
+  },
+  bossChallengeBtn: {
+    background: "linear-gradient(160deg,#ff9a5c,#ff5a36)",
+    border: "none",
+    borderRadius: 999,
+    padding: "8px 14px",
+    color: "#2a0d02",
+    fontWeight: 800,
+    fontSize: 11,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  },
+  certGrid: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 },
+  certCard: {
+    background: "#211f47",
+    border: "1px solid #3c3970",
+    borderRadius: 18,
+    padding: "16px 10px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 4,
+    textAlign: "center",
+  },
+  certCardWon: { borderColor: "#ffd37a", boxShadow: "0 0 0 2px #ffd37a55" },
+  certLocked: { fontSize: 40, opacity: 0.3, height: 72, display: "flex", alignItems: "center", justifyContent: "center" },
+  certGradeLabel: { fontFamily: "'Yusei Magic', sans-serif", fontSize: 13, marginTop: 4 },
+  certBossName: { fontSize: 12, fontWeight: 700, opacity: 0.9 },
+  certStatus: { fontSize: 10, opacity: 0.7, marginTop: 2 },
   questionText: { fontFamily: "'Yusei Magic', sans-serif", fontSize: 15, textAlign: "center", margin: "6px 0 4px", lineHeight: 1.6 },
   questionKanjiBig: {
     fontFamily: "'Zen Maru Gothic', sans-serif",

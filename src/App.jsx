@@ -1795,25 +1795,37 @@ const BOSS_LIVES = 3;
 const BOSS_WIN_GOLD = 200;
 
 function BossLion({ boss }) {
-  const spikes = [0, 25, 50, 75, 100, 125, 150, 180, 205, 230, 255, 280, 305, 330, 355];
+  const spikes = [0, 24, 48, 72, 96, 120, 144, 168, 192, 216, 240, 264, 288, 312, 336];
   return (
     <g>
+      <path d="M140,110 C162,100 168,78 158,62 C152,80 146,96 138,109 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <ellipse cx="157" cy="60" rx="8" ry="10" fill={boss.colorB} stroke={OUTLINE} strokeWidth="2" />
+      <rect x="100" y="122" width="18" height="38" rx="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <rect x="128" y="120" width="18" height="40" rx="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <ellipse cx="96" cy="107" rx="48" ry="34" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3.5" />
+      <rect x="56" y="122" width="18" height="42" rx="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <rect x="82" y="124" width="18" height="40" rx="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <g fill={boss.accent} stroke={OUTLINE} strokeWidth="1.4">
+        <polygon points="53,164 59,164 56,172" />
+        <polygon points="61,164 67,164 64,172" />
+        <polygon points="69,164 75,164 72,172" />
+      </g>
       <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="2">
         {spikes.map((deg) => (
-          <polygon key={deg} points="75,75 82,42 90,70" transform={`rotate(${deg} 75 75)`} />
+          <polygon key={deg} points="45,55 52,18 61,52" transform={`rotate(${deg} 45 55)`} />
         ))}
       </g>
-      <circle cx="75" cy="80" r="30" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
-      <ellipse cx="58" cy="63" rx="7" ry="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2" />
-      <ellipse cx="92" cy="63" rx="7" ry="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2" />
-      <ellipse cx="75" cy="93" rx="15" ry="11" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
-      <circle cx="64" cy="75" r="4.2" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
-      <circle cx="86" cy="75" r="4.2" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
-      <circle cx="65.2" cy="74" r="1.4" fill="#fff" />
-      <circle cx="87.2" cy="74" r="1.4" fill="#fff" />
-      <path d="M63,97 Q75,107 87,97" fill="none" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
-      <polygon points="64,98 67,106 61,103" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
-      <polygon points="86,98 83,106 89,103" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+      <circle cx="45" cy="55" r="27" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <ellipse cx="31" cy="41" rx="6" ry="6" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2" />
+      <ellipse cx="59" cy="41" rx="6" ry="6" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2" />
+      <ellipse cx="45" cy="66" rx="13" ry="9" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="34" cy="50" r="3.8" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.4" />
+      <circle cx="56" cy="50" r="3.8" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.4" />
+      <circle cx="35.2" cy="49" r="1.3" fill="#fff" />
+      <circle cx="57.2" cy="49" r="1.3" fill="#fff" />
+      <path d="M34,69 Q45,79 56,69" fill="none" stroke={OUTLINE} strokeWidth="2.3" strokeLinecap="round" />
+      <polygon points="35,70 38,78 32,75" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+      <polygon points="55,70 52,78 58,75" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
     </g>
   );
 }
@@ -1821,28 +1833,30 @@ function BossLion({ boss }) {
 function BossCrocodile({ boss }) {
   return (
     <g>
-      <ellipse cx="80" cy="92" rx="34" ry="18" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
-      <path d="M45,88 C15,82 -3,90 2,102 C18,100 34,97 47,94 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <path d="M20,122 C-12,126 -34,110 -32,88 C-17,97 2,110 24,118 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <g fill={boss.colorB}>
+        <polygon points="-22,96 -15,85 -10,98" />
+        <polygon points="-8,91 -1,80 4,93" />
+      </g>
+      <rect x="35" y="130" width="14" height="26" rx="5" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <rect x="100" y="128" width="14" height="28" rx="5" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <ellipse cx="82" cy="120" rx="56" ry="27" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3.5" />
       <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="1.6">
-        <polygon points="60,74 65,60 70,75" />
-        <polygon points="75,72 80,57 85,73" />
-        <polygon points="90,74 95,60 100,75" />
+        <polygon points="46,99 51,84 56,100" />
+        <polygon points="61,96 66,80 71,97" />
+        <polygon points="76,95 81,79 86,96" />
+        <polygon points="91,96 96,80 101,97" />
       </g>
-      <ellipse cx="62" cy="74" rx="6" ry="5" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
-      <ellipse cx="96" cy="74" rx="6" ry="5" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
-      <circle cx="62" cy="73" r="2.6" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1" />
-      <circle cx="96" cy="73" r="2.6" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1" />
-      <path d="M4,98 L46,90 L46,98 L6,106 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <path d="M133,101 C165,90 186,101 180,118 C172,131 148,127 130,112 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <path d="M180,118 L196,122 L180,131 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
       <g fill="#fff" stroke={OUTLINE} strokeWidth="0.8">
-        <polygon points="8,100 11,94 14,100" />
-        <polygon points="16,98 19,92 22,98" />
-        <polygon points="24,96 27,90 30,96" />
-        <polygon points="32,94 35,88 38,94" />
+        <polygon points="142,110 146,101 150,110" />
+        <polygon points="152,108 156,99 160,108" />
+        <polygon points="162,108 166,99 170,108" />
       </g>
-      <g fill={boss.colorB} opacity="0.85">
-        <ellipse cx="100" cy="86" rx="4" ry="6" />
-        <ellipse cx="112" cy="90" rx="4" ry="6" />
-      </g>
+      <ellipse cx="142" cy="99" rx="6" ry="5" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="142" cy="98" r="2.7" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1" />
+      <circle cx="143.2" cy="97" r="1" fill="#fff" />
     </g>
   );
 }
@@ -1850,23 +1864,42 @@ function BossCrocodile({ boss }) {
 function BossTiger({ boss }) {
   return (
     <g>
-      <circle cx="75" cy="80" r="32" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
-      <polygon points="50,58 42,38 60,50" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
-      <polygon points="100,58 108,38 90,50" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
-      <g stroke={boss.colorB} strokeWidth="3.5" fill="none" strokeLinecap="round">
-        <path d="M50,60 Q58,55 64,60" />
-        <path d="M86,60 Q92,55 100,60" />
-        <path d="M46,75 Q54,72 60,76" />
-        <path d="M90,76 Q96,72 104,75" />
+      <path d="M138,108 C162,94 172,68 161,49 C153,68 147,87 137,105 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <g stroke={boss.colorB} strokeWidth="3" fill="none" strokeLinecap="round">
+        <path d="M147,92 L157,85" />
+        <path d="M150,79 L160,71" />
+        <path d="M153,64 L161,55" />
       </g>
-      <ellipse cx="75" cy="92" rx="15" ry="11" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
-      <circle cx="63" cy="75" r="4.4" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
-      <circle cx="87" cy="75" r="4.4" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
-      <circle cx="64.2" cy="74" r="1.5" fill="#fff" />
-      <circle cx="88.2" cy="74" r="1.5" fill="#fff" />
-      <path d="M63,96 Q75,106 87,96" fill="none" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
-      <polygon points="64,97 67,105 61,102" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
-      <polygon points="86,97 83,105 89,102" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+      <rect x="97" y="123" width="18" height="40" rx="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <rect x="122" y="121" width="18" height="42" rx="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <ellipse cx="92" cy="107" rx="46" ry="32" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3.5" />
+      <g stroke={boss.colorB} strokeWidth="3.5" fill="none" strokeLinecap="round">
+        <path d="M56,90 Q66,86 74,93" />
+        <path d="M102,86 Q110,82 118,89" />
+        <path d="M52,111 Q62,107 70,113" />
+        <path d="M97,113 Q107,109 117,115" />
+      </g>
+      <rect x="51" y="123" width="18" height="42" rx="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <rect x="77" y="125" width="18" height="40" rx="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <g fill={boss.accent} stroke={OUTLINE} strokeWidth="1.3">
+        <polygon points="48,165 54,165 51,173" />
+        <polygon points="56,165 62,165 59,173" />
+      </g>
+      <polygon points="30,44 19,23 41,37" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <polygon points="56,44 67,23 45,37" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <circle cx="43" cy="55" r="27" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <g stroke={boss.colorB} strokeWidth="3" fill="none" strokeLinecap="round">
+        <path d="M22,47 Q29,43 35,47" />
+        <path d="M51,47 Q57,43 64,47" />
+      </g>
+      <ellipse cx="43" cy="66" rx="13" ry="9" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="32" cy="50" r="3.9" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.4" />
+      <circle cx="54" cy="50" r="3.9" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.4" />
+      <circle cx="33.2" cy="49" r="1.3" fill="#fff" />
+      <circle cx="55.2" cy="49" r="1.3" fill="#fff" />
+      <path d="M32,69 Q43,79 54,69" fill="none" stroke={OUTLINE} strokeWidth="2.3" strokeLinecap="round" />
+      <polygon points="33,70 36,78 30,75" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+      <polygon points="53,70 50,78 56,75" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
     </g>
   );
 }
@@ -1874,74 +1907,100 @@ function BossTiger({ boss }) {
 function BossTRex({ boss }) {
   return (
     <g>
-      <ellipse cx="80" cy="108" rx="28" ry="20" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <path d="M112,132 C154,142 180,158 175,174 C154,163 128,151 107,141 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <path d="M60,122 L49,172 L66,172 L73,126 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <path d="M92,122 L86,172 L103,172 L102,124 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <g fill={boss.accent} stroke={OUTLINE} strokeWidth="1.3">
+        <polygon points="47,172 53,172 50,180" />
+        <polygon points="56,172 62,172 59,180" />
+        <polygon points="86,172 92,172 89,180" />
+        <polygon points="94,172 100,172 97,180" />
+      </g>
+      <ellipse cx="80" cy="107" rx="34" ry="30" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3.5" />
+      <path d="M51,96 L36,107 L41,115 L56,106 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.2" />
+      <g fill={boss.accent} stroke={OUTLINE} strokeWidth="1">
+        <polygon points="35,116 39,110 41,117" />
+      </g>
       <path
-        d="M50,60 C40,40 55,20 78,25 C100,29 112,50 108,72 C104,90 84,96 68,86 C55,78 52,68 50,60 Z"
+        d="M56,60 C42,42 56,19 82,23 C107,27 120,50 113,73 C107,92 83,97 65,86 C52,78 50,68 56,60 Z"
         fill={boss.colorA}
         stroke={OUTLINE}
         strokeWidth="3"
       />
-      <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="1.6">
-        <polygon points="60,30 65,16 70,31" />
-        <polygon points="75,26 80,12 85,27" />
+      <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="1.5">
+        <polygon points="67,29 72,15 77,30" />
+        <polygon points="82,25 87,10 92,26" />
       </g>
-      <circle cx="90" cy="48" r="4.5" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.6" />
-      <circle cx="91.3" cy="47" r="1.5" fill="#fff" />
-      <path d="M50,60 C35,62 22,68 18,78 L48,74 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <circle cx="93" cy="48" r="4.5" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
+      <circle cx="94.3" cy="47" r="1.5" fill="#fff" />
+      <path d="M56,60 C40,63 25,71 21,81 L53,75 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
       <g fill="#fff" stroke={OUTLINE} strokeWidth="0.9">
-        <polygon points="20,76 24,68 27,76" />
-        <polygon points="30,74 34,66 37,74" />
-        <polygon points="40,72 44,64 47,72" />
+        <polygon points="23,79 27,71 30,79" />
+        <polygon points="33,77 37,69 40,77" />
+        <polygon points="43,75 47,67 50,75" />
       </g>
     </g>
   );
 }
 
 function BossMosasaurus({ boss }) {
-  const spine = "M5,90 C10,60 35,35 65,38 C90,40 95,65 75,72 C58,78 62,98 85,100 C108,102 128,80 130,55";
+  const spine = "M10,150 C0,110 20,70 55,60 C85,52 100,75 80,88 C62,98 68,120 95,122 C122,124 145,100 150,70";
   return (
     <g>
-      <path d={spine} fill="none" stroke={OUTLINE} strokeWidth="26" strokeLinecap="round" />
-      <path d={spine} fill="none" stroke={boss.colorA} strokeWidth="19" strokeLinecap="round" />
+      <path d="M45,110 C25,120 10,130 8,145 C25,138 42,128 55,118 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <path d="M95,95 C110,108 118,122 112,135 C98,124 86,110 80,98 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <path d={spine} fill="none" stroke={OUTLINE} strokeWidth="32" strokeLinecap="round" />
+      <path d={spine} fill="none" stroke={boss.colorA} strokeWidth="24" strokeLinecap="round" />
       <g fill={boss.colorB} opacity="0.85">
-        <polygon points="20,72 26,60 30,74" />
-        <polygon points="35,55 41,44 45,58" />
+        <polygon points="25,100 33,86 38,102" />
+        <polygon points="42,82 50,68 55,84" />
+        <polygon points="60,68 68,55 73,70" />
       </g>
-      <path d="M100,42 C118,32 134,40 130,55 C126,66 110,64 98,54 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
-      <circle cx="115" cy="48" r="4" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
-      <circle cx="116.2" cy="47" r="1.3" fill="#fff" />
-      <path d="M124,50 L134,53 L124,58" fill="none" stroke={OUTLINE} strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M120,58 C142,46 160,54 155,72 C150,86 128,82 115,68 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <circle cx="138" cy="62" r="4.3" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
+      <circle cx="139.3" cy="61" r="1.4" fill="#fff" />
+      <path d="M148,66 L160,70 L148,76" fill="none" stroke={OUTLINE} strokeWidth="2.3" strokeLinecap="round" />
       <g fill="#fff" stroke={OUTLINE} strokeWidth="0.8">
-        <polygon points="106,52 109,58 103,56" />
-        <polygon points="112,54 115,60 109,58" />
+        <polygon points="128,70 132,76 124,74" />
+        <polygon points="136,72 140,78 132,76" />
       </g>
-      <path d="M0,88 C-8,80 -8,68 0,62 C4,72 6,80 8,88 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <path d="M4,150 C-8,140 -8,122 4,114 C11,127 13,140 15,150 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
     </g>
   );
 }
 
 function BossDragon({ boss }) {
-  const spine = "M10,95 C5,55 30,15 65,18 C95,20 100,55 70,62 C42,68 48,100 75,105 C105,110 130,85 132,50";
+  const spine = "M15,150 C5,110 25,65 60,55 C90,47 105,72 82,84 C60,94 68,118 98,118 C128,118 148,92 150,60";
   return (
     <g>
+      <g fill={boss.accent} stroke={OUTLINE} strokeWidth="2.5" opacity="0.94">
+        <path d="M55,70 C20,55 0,20 15,-10 C28,15 45,40 62,58 Z" />
+        <path d="M75,60 C100,40 108,10 95,-15 C85,10 75,35 65,55 Z" />
+      </g>
       <path d={spine} fill="none" stroke={OUTLINE} strokeWidth="30" strokeLinecap="round" />
       <path d={spine} fill="none" stroke={boss.colorA} strokeWidth="23" strokeLinecap="round" />
       <path d={spine} fill="none" stroke={boss.colorB} strokeWidth="6" strokeLinecap="round" opacity="0.5" strokeDasharray="1 16" />
       <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="2.2">
-        <polygon points="55,25 62,6 68,26" />
-        <polygon points="70,20 78,2 84,22" />
-        <polygon points="40,68 47,50 53,70" />
-        <polygon points="60,86 66,70 71,88" />
+        <polygon points="55,58 62,38 68,59" />
+        <polygon points="70,52 78,32 84,53" />
       </g>
-      <g>
-        <path d="M118,35 C138,27 152,38 148,53 C143,65 126,63 115,50 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
-        <path d="M122,26 C118,8 129,0 136,9 C131,17 126,24 122,26 Z" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
-        <path d="M133,26 C138,8 151,3 155,12 C148,19 141,25 133,26 Z" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
-        <circle cx="131" cy="45" r="4.2" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.6" />
-        <circle cx="132.2" cy="44.1" r="1.4" fill="#fff" />
-        <path d="M139,53 L149,57 L139,62" fill="none" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
-        <polygon points="135,55 138,61 132,59" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+      <g fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.2">
+        <path d="M70,90 L60,108 L72,112 L80,96 Z" />
+        <path d="M95,105 L88,125 L100,128 L106,110 Z" />
       </g>
+      <g fill={boss.accent} stroke={OUTLINE} strokeWidth="1.2">
+        <polygon points="58,108 63,108 60,116" />
+        <polygon points="66,110 71,110 68,118" />
+        <polygon points="90,125 95,125 92,133" />
+        <polygon points="98,127 103,127 100,135" />
+      </g>
+      <path d="M130,55 C155,45 172,58 166,76 C160,90 138,86 125,70 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <path d="M136,44 C132,26 143,18 150,27 C145,35 140,42 136,44 Z" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <path d="M148,44 C152,26 166,20 170,29 C163,37 155,43 148,44 Z" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="146" cy="65" r="4.4" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.6" />
+      <circle cx="147.3" cy="64" r="1.5" fill="#fff" />
+      <path d="M155,73 L166,77 L155,83" fill="none" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
+      <polygon points="150,75 153,82 146,79" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
     </g>
   );
 }
@@ -1955,8 +2014,8 @@ function BossCreature({ boss, size = 180 }) {
   else if (boss.animal === "mosasaurus") body = <BossMosasaurus boss={boss} />;
   else body = <BossDragon boss={boss} />;
   return (
-    <svg viewBox="0 0 150 150" width={size} height={size} style={{ overflow: "visible" }}>
-      <circle cx="75" cy="75" r="92" fill={boss.colorA} opacity="0.18" />
+    <svg viewBox="-40 -30 240 220" width={size} height={size * (220 / 240)} style={{ overflow: "visible" }}>
+      <circle cx="90" cy="90" r="135" fill={boss.colorA} opacity="0.16" />
       {body}
     </svg>
   );
@@ -3349,9 +3408,13 @@ function AppInner() {
 
                 {boss.result === "win" ? (
                   <div style={styles.bannerWrap}>
-                    <div style={styles.bannerNew}>
-                      🏆 {bossData.name}を たおした！「{grade.label}の しょうじょう」を てにいれた！
+                    <div style={styles.certAwardCard}>
+                      <div style={styles.certAwardLabel}>🏆 しょうじょう しゅとく！</div>
+                      <BossCreature boss={bossData} size={130} />
+                      <div style={styles.certAwardGrade}>{grade.label}</div>
+                      <div style={styles.certAwardBossName}>{bossData.name}</div>
                     </div>
+                    <div style={styles.bannerNew}>🏆 {bossData.name}を たおした！</div>
                     <div style={styles.goldNoteBanner}>🪙 +{BOSS_WIN_GOLD} G ゲット！</div>
                     <button style={styles.nextBtn} onClick={closeBossFight}>
                       もどる
@@ -4096,6 +4159,20 @@ const styles = {
     whiteSpace: "nowrap",
   },
   certGrid: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 },
+  certAwardCard: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 4,
+    background: "linear-gradient(160deg,#3a2f14,#1b1a3a)",
+    border: "2px solid #ffd37a",
+    borderRadius: 20,
+    padding: "14px 20px 16px",
+    boxShadow: "0 0 20px rgba(255,211,122,0.35)",
+  },
+  certAwardLabel: { fontSize: 12, fontWeight: 800, color: "#ffd37a" },
+  certAwardGrade: { fontFamily: "'Yusei Magic', sans-serif", fontSize: 14, color: "#fff", marginTop: 4 },
+  certAwardBossName: { fontSize: 12, opacity: 0.85 },
   certCard: {
     background: "#211f47",
     border: "1px solid #3c3970",

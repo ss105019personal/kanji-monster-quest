@@ -1118,30 +1118,41 @@ function heroExpForLevel(lvl) {
   return Math.ceil(((lvl - 1) * HERO_EXP_FOR_MAX_LEVEL) / (HERO_MAX_LEVEL - 1));
 }
 
-/* Lv.1〜100を10だんかいに分ける（Lv.100だけ とくべつな10だんめ） */
+/* Lv.1〜100を21だんかいに分ける（Lv.100だけ とくべつな さいごの だんかい） */
 const HERO_TITLES = {
   1: "クラスの にんきもの",
   2: "げんきな しんじん ぼうけんしゃ",
   3: "みならい けんし",
-  4: "いちにんまえの ぼうけんしゃ",
-  5: "ゆうかんな せんし",
-  6: "せいぎの エリートきし",
-  7: "えいゆう",
-  8: "たいえいゆう",
-  9: "ふはいの ゆうしゃ",
-  10: "でんせつの ゆうしゃ",
+  4: "かけだしの ぼうけんしゃ",
+  5: "いちにんまえの ぼうけんしゃ",
+  6: "ちいきの ヒーロー",
+  7: "ゆうかんな せんし",
+  8: "たのもしい せんし",
+  9: "せいぎの きし",
+  10: "エリートきし",
+  11: "きしだんちょう",
+  12: "えいゆう",
+  13: "たいえいゆう",
+  14: "おうこくの えいゆう",
+  15: "たいりくの えいゆう",
+  16: "せかいの えいゆう",
+  17: "でんせつの きし",
+  18: "ふはいの ゆうしゃ",
+  19: "しんわの ゆうしゃ",
+  20: "ちじょう さいきょうの ゆうしゃ",
+  21: "でんせつの ゆうしゃ",
 };
 function heroTierFromLevel(level) {
-  if (level >= HERO_MAX_LEVEL) return 10;
-  return Math.max(1, Math.min(9, Math.ceil(level / 11)));
+  if (level >= HERO_MAX_LEVEL) return 21;
+  return Math.max(1, Math.min(20, Math.ceil(level / 5)));
 }
 function heroTitleFromLevel(level) {
   return HERO_TITLES[heroTierFromLevel(level)];
 }
 function heroLevelsUntilNextTier(level) {
   const tier = heroTierFromLevel(level);
-  if (tier >= 10) return 0;
-  const nextTierStart = tier < 9 ? tier * 11 + 1 : HERO_MAX_LEVEL;
+  if (tier >= 21) return 0;
+  const nextTierStart = tier < 20 ? tier * 5 + 1 : HERO_MAX_LEVEL;
   return Math.max(0, nextTierStart - level);
 }
 
@@ -2232,19 +2243,30 @@ function statsLabel(item) {
 
 const HERO_TIER_CONFIG = {
   1: { els: [], mount: 0, wing: 0, cape: 1, capeColor: ["#5a3f52", "#7a5468"], halo: false, sparkle: 0, aura: null },
-  2: { els: [], mount: 0, wing: 0, cape: 1, capeColor: ["#3d5a3f", "#5e8a63"], halo: false, sparkle: 0, aura: null },
-  3: { els: ["water"], mount: 0, wing: 0, cape: 1, capeColor: ["#2e4a63", "#3d6a8f"], halo: false, sparkle: 0, aura: "#57C7F5" },
-  4: { els: ["water", "thunder"], mount: 0, wing: 0, cape: 2, capeColor: ["#3d3a63", "#6a5e9f"], halo: false, sparkle: 0, aura: "#FFE066" },
-  5: { els: ["water", "thunder", "fire"], mount: 0, wing: 0.95, cape: 2, capeColor: ["#8f2e1a", "#ff8a5c"], halo: false, sparkle: 0, aura: "#FF7A50" },
-  6: { els: ["water", "thunder", "fire", "earth"], mount: 0, wing: 1.15, cape: 2, capeColor: ["#4a3620", "#8a6a3f"], halo: false, sparkle: 0, aura: "#D3A45E" },
-  7: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 0, wing: 1.25, cape: 3, capeColor: ["#2f5e1c", "#8fcb4e"], halo: false, sparkle: 0, aura: "#8FCB4E" },
-  8: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 1, wing: 1.3, cape: 3, capeColor: ["#5a2f8f", "#a76aff"], halo: false, sparkle: 2, aura: "#c98cff" },
-  9: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 2, wing: 1.4, cape: 3, capeColor: ["#9a7a1e", "#ffe9a8"], halo: true, sparkle: 5, aura: "#ffd24d" },
-  10: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 3, wing: 1.55, cape: 3, capeColor: ["#c9a24d", "#fff6d5"], halo: true, sparkle: 8, aura: null, legend: true },
+  2: { els: [], mount: 0, wing: 0, cape: 1, capeColor: ["#5a3f52", "#7a5468"], halo: false, sparkle: 0, aura: null },
+  3: { els: [], mount: 0, wing: 0, cape: 1, capeColor: ["#3d5a3f", "#5e8a63"], halo: false, sparkle: 0, aura: null },
+  4: { els: [], mount: 0, wing: 0, cape: 1, capeColor: ["#3d5a3f", "#5e8a63"], halo: false, sparkle: 0, aura: null },
+  5: { els: ["water"], mount: 0, wing: 0, cape: 1, capeColor: ["#2e4a63", "#3d6a8f"], halo: false, sparkle: 0, aura: "#57C7F5" },
+  6: { els: ["water"], mount: 0, wing: 0, cape: 1, capeColor: ["#2e4a63", "#3d6a8f"], halo: false, sparkle: 0, aura: "#57C7F5" },
+  7: { els: ["water"], mount: 0, wing: 0, cape: 2, capeColor: ["#2e4a63", "#3d6a8f"], halo: false, sparkle: 0, aura: "#57C7F5" },
+  8: { els: ["water", "thunder"], mount: 0, wing: 0, cape: 2, capeColor: ["#3d3a63", "#6a5e9f"], halo: false, sparkle: 0, aura: "#FFE066" },
+  9: { els: ["water", "thunder"], mount: 0, wing: 0, cape: 2, capeColor: ["#3d3a63", "#6a5e9f"], halo: false, sparkle: 0, aura: "#FFE066" },
+  10: { els: ["water", "thunder"], mount: 0, wing: 0, cape: 2, capeColor: ["#3d3a63", "#6a5e9f"], halo: false, sparkle: 0, aura: "#FFE066" },
+  11: { els: ["water", "thunder", "fire"], mount: 0, wing: 0.95, cape: 2, capeColor: ["#8f2e1a", "#ff8a5c"], halo: false, sparkle: 0, aura: "#FF7A50" },
+  12: { els: ["water", "thunder", "fire"], mount: 0, wing: 1.0, cape: 2, capeColor: ["#8f2e1a", "#ff8a5c"], halo: false, sparkle: 0, aura: "#FF7A50" },
+  13: { els: ["water", "thunder", "fire", "earth"], mount: 0, wing: 1.15, cape: 2, capeColor: ["#4a3620", "#8a6a3f"], halo: false, sparkle: 0, aura: "#D3A45E" },
+  14: { els: ["water", "thunder", "fire", "earth"], mount: 0, wing: 1.15, cape: 2, capeColor: ["#4a3620", "#8a6a3f"], halo: false, sparkle: 0, aura: "#D3A45E" },
+  15: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 0, wing: 1.25, cape: 3, capeColor: ["#2f5e1c", "#8fcb4e"], halo: false, sparkle: 0, aura: "#8FCB4E" },
+  16: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 0, wing: 1.25, cape: 3, capeColor: ["#2f5e1c", "#8fcb4e"], halo: false, sparkle: 0, aura: "#8FCB4E" },
+  17: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 1, wing: 1.3, cape: 3, capeColor: ["#5a2f8f", "#a76aff"], halo: false, sparkle: 1, aura: "#c98cff" },
+  18: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 1, wing: 1.3, cape: 3, capeColor: ["#5a2f8f", "#a76aff"], halo: false, sparkle: 2, aura: "#c98cff" },
+  19: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 2, wing: 1.4, cape: 3, capeColor: ["#9a7a1e", "#ffe9a8"], halo: true, sparkle: 3, aura: "#ffd24d" },
+  20: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 2, wing: 1.4, cape: 3, capeColor: ["#9a7a1e", "#ffe9a8"], halo: true, sparkle: 5, aura: "#ffd24d" },
+  21: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 3, wing: 1.55, cape: 3, capeColor: ["#c9a24d", "#fff6d5"], halo: true, sparkle: 8, aura: null, legend: true },
 };
 
 function HeroLegendBurst({ tier }) {
-  if (tier < 10) return null;
+  if (tier < 21) return null;
   const beams = [0, 45, 90, 135, 180, 225, 270, 315];
   return (
     <g opacity="0.45">
@@ -2257,7 +2279,7 @@ function HeroLegendBurst({ tier }) {
 
 function HeroWings({ tier, wingScale }) {
   if (!wingScale) return null;
-  const color = tier >= 10 ? "#fff6d5" : tier >= 9 ? "#ffe9a8" : tier >= 7 ? "#8fcb4e" : tier >= 5 ? "#ff8a5c" : "#7fe3ff";
+  const color = tier >= 21 ? "#fff6d5" : tier >= 19 ? "#ffe9a8" : tier >= 15 ? "#8fcb4e" : tier >= 11 ? "#ff8a5c" : "#7fe3ff";
   return (
     <g style={{ transform: `scale(${wingScale})`, transformOrigin: "70px 60px" }}>
       <g fill={color} stroke={OUTLINE} strokeWidth="2.5" opacity="0.95">
@@ -2393,9 +2415,9 @@ function HeroMount({ kind }) {
 
 function HeroCat({ tier, onCloud }) {
   if (tier < 2) return null;
-  const color = tier >= 9 ? "#ffe9a8" : tier >= 7 ? "#8fcb4e" : tier >= 5 ? "#ff8a5c" : tier >= 3 ? "#7fe3ff" : "#c9a24d";
-  const hasWings = tier >= 5;
-  const hasHalo = tier >= 9;
+  const color = tier >= 19 ? "#ffe9a8" : tier >= 15 ? "#8fcb4e" : tier >= 11 ? "#ff8a5c" : tier >= 5 ? "#7fe3ff" : "#c9a24d";
+  const hasWings = tier >= 11;
+  const hasHalo = tier >= 19;
   const cx = onCloud ? 128 : 120;
   const cy = onCloud ? 176 : 178;
   return (

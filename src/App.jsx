@@ -1779,12 +1779,12 @@ function GuardianCreature({ guardianId, size = 140, pop = false, equipment = nul
 /* ================================================================== */
 
 const BOSSES = [
-  { grade: 1, name: "みどりの ぬし", colorA: "#8FCB4E", colorB: "#2F5E1C", accent: "#DDF2B4" },
-  { grade: 2, name: "あらしの まおう", colorA: "#A692E8", colorB: "#4F5FB8", accent: "#E7E2FF" },
-  { grade: 3, name: "だいちの きょじん", colorA: "#D3A45E", colorB: "#7A4E27", accent: "#F1DDB0" },
-  { grade: 4, name: "ごうかの りゅう", colorA: "#FF7A50", colorB: "#B5301A", accent: "#FFD37A" },
-  { grade: 5, name: "しんかいの ぬし", colorA: "#57C7F5", colorB: "#0C5C8C", accent: "#BFEFFF" },
-  { grade: 6, name: "かんじの まおう", colorA: "#B26FE0", colorB: "#3a1a52", accent: "#F4DFFF" },
+  { grade: 1, name: "しんりんの ライオンおう", animal: "lion", colorA: "#D9A441", colorB: "#8a5a1e", accent: "#FFE3A0" },
+  { grade: 2, name: "あらしの わにがみ", animal: "crocodile", colorA: "#5C8A4A", colorB: "#2F4A22", accent: "#BFE0A8" },
+  { grade: 3, name: "だいちの とらしょうぐん", animal: "tiger", colorA: "#E08A3C", colorB: "#7A3E10", accent: "#FFE0B0" },
+  { grade: 4, name: "ごうかの ティラノサウルス", animal: "trex", colorA: "#C0392B", colorB: "#5c1810", accent: "#FFB199" },
+  { grade: 5, name: "しんかいの モササウルス", animal: "mosasaurus", colorA: "#2C6E8F", colorB: "#12324a", accent: "#9FE3FF" },
+  { grade: 6, name: "かんじの りゅうおう", animal: "dragon", colorA: "#B26FE0", colorB: "#3a1a52", accent: "#F4DFFF" },
 ];
 function bossForGrade(gradeId) {
   return BOSSES.find((b) => b.grade === gradeId);
@@ -1794,11 +1794,136 @@ const BOSS_ROUNDS = 5;
 const BOSS_LIVES = 3;
 const BOSS_WIN_GOLD = 200;
 
-function BossCreature({ boss, size = 180 }) {
+function BossLion({ boss }) {
+  const spikes = [0, 25, 50, 75, 100, 125, 150, 180, 205, 230, 255, 280, 305, 330, 355];
+  return (
+    <g>
+      <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="2">
+        {spikes.map((deg) => (
+          <polygon key={deg} points="75,75 82,42 90,70" transform={`rotate(${deg} 75 75)`} />
+        ))}
+      </g>
+      <circle cx="75" cy="80" r="30" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <ellipse cx="58" cy="63" rx="7" ry="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2" />
+      <ellipse cx="92" cy="63" rx="7" ry="7" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2" />
+      <ellipse cx="75" cy="93" rx="15" ry="11" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="64" cy="75" r="4.2" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
+      <circle cx="86" cy="75" r="4.2" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
+      <circle cx="65.2" cy="74" r="1.4" fill="#fff" />
+      <circle cx="87.2" cy="74" r="1.4" fill="#fff" />
+      <path d="M63,97 Q75,107 87,97" fill="none" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
+      <polygon points="64,98 67,106 61,103" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+      <polygon points="86,98 83,106 89,103" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+    </g>
+  );
+}
+
+function BossCrocodile({ boss }) {
+  return (
+    <g>
+      <ellipse cx="80" cy="92" rx="34" ry="18" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <path d="M45,88 C15,82 -3,90 2,102 C18,100 34,97 47,94 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="1.6">
+        <polygon points="60,74 65,60 70,75" />
+        <polygon points="75,72 80,57 85,73" />
+        <polygon points="90,74 95,60 100,75" />
+      </g>
+      <ellipse cx="62" cy="74" rx="6" ry="5" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <ellipse cx="96" cy="74" rx="6" ry="5" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="62" cy="73" r="2.6" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1" />
+      <circle cx="96" cy="73" r="2.6" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1" />
+      <path d="M4,98 L46,90 L46,98 L6,106 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <g fill="#fff" stroke={OUTLINE} strokeWidth="0.8">
+        <polygon points="8,100 11,94 14,100" />
+        <polygon points="16,98 19,92 22,98" />
+        <polygon points="24,96 27,90 30,96" />
+        <polygon points="32,94 35,88 38,94" />
+      </g>
+      <g fill={boss.colorB} opacity="0.85">
+        <ellipse cx="100" cy="86" rx="4" ry="6" />
+        <ellipse cx="112" cy="90" rx="4" ry="6" />
+      </g>
+    </g>
+  );
+}
+
+function BossTiger({ boss }) {
+  return (
+    <g>
+      <circle cx="75" cy="80" r="32" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <polygon points="50,58 42,38 60,50" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <polygon points="100,58 108,38 90,50" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+      <g stroke={boss.colorB} strokeWidth="3.5" fill="none" strokeLinecap="round">
+        <path d="M50,60 Q58,55 64,60" />
+        <path d="M86,60 Q92,55 100,60" />
+        <path d="M46,75 Q54,72 60,76" />
+        <path d="M90,76 Q96,72 104,75" />
+      </g>
+      <ellipse cx="75" cy="92" rx="15" ry="11" fill={boss.accent} stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="63" cy="75" r="4.4" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
+      <circle cx="87" cy="75" r="4.4" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
+      <circle cx="64.2" cy="74" r="1.5" fill="#fff" />
+      <circle cx="88.2" cy="74" r="1.5" fill="#fff" />
+      <path d="M63,96 Q75,106 87,96" fill="none" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
+      <polygon points="64,97 67,105 61,102" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+      <polygon points="86,97 83,105 89,102" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
+    </g>
+  );
+}
+
+function BossTRex({ boss }) {
+  return (
+    <g>
+      <ellipse cx="80" cy="108" rx="28" ry="20" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <path
+        d="M50,60 C40,40 55,20 78,25 C100,29 112,50 108,72 C104,90 84,96 68,86 C55,78 52,68 50,60 Z"
+        fill={boss.colorA}
+        stroke={OUTLINE}
+        strokeWidth="3"
+      />
+      <g fill={boss.colorB} stroke={OUTLINE} strokeWidth="1.6">
+        <polygon points="60,30 65,16 70,31" />
+        <polygon points="75,26 80,12 85,27" />
+      </g>
+      <circle cx="90" cy="48" r="4.5" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.6" />
+      <circle cx="91.3" cy="47" r="1.5" fill="#fff" />
+      <path d="M50,60 C35,62 22,68 18,78 L48,74 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <g fill="#fff" stroke={OUTLINE} strokeWidth="0.9">
+        <polygon points="20,76 24,68 27,76" />
+        <polygon points="30,74 34,66 37,74" />
+        <polygon points="40,72 44,64 47,72" />
+      </g>
+    </g>
+  );
+}
+
+function BossMosasaurus({ boss }) {
+  const spine = "M5,90 C10,60 35,35 65,38 C90,40 95,65 75,72 C58,78 62,98 85,100 C108,102 128,80 130,55";
+  return (
+    <g>
+      <path d={spine} fill="none" stroke={OUTLINE} strokeWidth="26" strokeLinecap="round" />
+      <path d={spine} fill="none" stroke={boss.colorA} strokeWidth="19" strokeLinecap="round" />
+      <g fill={boss.colorB} opacity="0.85">
+        <polygon points="20,72 26,60 30,74" />
+        <polygon points="35,55 41,44 45,58" />
+      </g>
+      <path d="M100,42 C118,32 134,40 130,55 C126,66 110,64 98,54 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="3" />
+      <circle cx="115" cy="48" r="4" fill="#ff3b3b" stroke={OUTLINE} strokeWidth="1.5" />
+      <circle cx="116.2" cy="47" r="1.3" fill="#fff" />
+      <path d="M124,50 L134,53 L124,58" fill="none" stroke={OUTLINE} strokeWidth="2.2" strokeLinecap="round" />
+      <g fill="#fff" stroke={OUTLINE} strokeWidth="0.8">
+        <polygon points="106,52 109,58 103,56" />
+        <polygon points="112,54 115,60 109,58" />
+      </g>
+      <path d="M0,88 C-8,80 -8,68 0,62 C4,72 6,80 8,88 Z" fill={boss.colorA} stroke={OUTLINE} strokeWidth="2.5" />
+    </g>
+  );
+}
+
+function BossDragon({ boss }) {
   const spine = "M10,95 C5,55 30,15 65,18 C95,20 100,55 70,62 C42,68 48,100 75,105 C105,110 130,85 132,50";
   return (
-    <svg viewBox="0 0 150 150" width={size} height={size} style={{ overflow: "visible" }}>
-      <circle cx="75" cy="75" r="92" fill={boss.colorA} opacity="0.18" />
+    <g>
       <path d={spine} fill="none" stroke={OUTLINE} strokeWidth="30" strokeLinecap="round" />
       <path d={spine} fill="none" stroke={boss.colorA} strokeWidth="23" strokeLinecap="round" />
       <path d={spine} fill="none" stroke={boss.colorB} strokeWidth="6" strokeLinecap="round" opacity="0.5" strokeDasharray="1 16" />
@@ -1817,6 +1942,22 @@ function BossCreature({ boss, size = 180 }) {
         <path d="M139,53 L149,57 L139,62" fill="none" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
         <polygon points="135,55 138,61 132,59" fill="#fff" stroke={OUTLINE} strokeWidth="1" />
       </g>
+    </g>
+  );
+}
+
+function BossCreature({ boss, size = 180 }) {
+  let body;
+  if (boss.animal === "lion") body = <BossLion boss={boss} />;
+  else if (boss.animal === "crocodile") body = <BossCrocodile boss={boss} />;
+  else if (boss.animal === "tiger") body = <BossTiger boss={boss} />;
+  else if (boss.animal === "trex") body = <BossTRex boss={boss} />;
+  else if (boss.animal === "mosasaurus") body = <BossMosasaurus boss={boss} />;
+  else body = <BossDragon boss={boss} />;
+  return (
+    <svg viewBox="0 0 150 150" width={size} height={size} style={{ overflow: "visible" }}>
+      <circle cx="75" cy="75" r="92" fill={boss.colorA} opacity="0.18" />
+      {body}
     </svg>
   );
 }
@@ -2494,6 +2635,8 @@ function AppInner() {
   const [screen, setScreen] = useState("battle"); // battle | zukan | party | shop | certificates
   const [bossDefeated, setBossDefeated] = useState({}); // { [gradeId]: true }
   const [boss, setBoss] = useState(null); // ボスせん中の じょうたい（null = たたかっていない）
+  const [bossCutIn, setBossCutIn] = useState(null); // ボス しゅつげん カットイン（null = ひょうじしない）
+  const [heroEvolveEffect, setHeroEvolveEffect] = useState(null); // ゆうしゃ しんか えんしゅつ（null = ひょうじしない）
   const [question, setQuestion] = useState(null);
   const [qMode, setQMode] = useState("reading"); // reading | meaning | write
   const [locked, setLocked] = useState(false);
@@ -2738,6 +2881,8 @@ function AppInner() {
         const newTier = heroTierFromLevel(newHeroLevel);
         if (newTier > prevTier) {
           setLevelUpNote(`⭐ ${profile} が Lv.${newHeroLevel}「${HERO_TITLES[newTier]}」に なった！`);
+          setHeroEvolveEffect({ level: newHeroLevel, title: HERO_TITLES[newTier] });
+          setTimeout(() => setHeroEvolveEffect(null), 2000);
         } else {
           setLevelUpNote(`⭐ ${profile} が Lv.${newHeroLevel} に レベルアップ！`);
         }
@@ -2785,8 +2930,13 @@ function AppInner() {
   const gradeFullyMastered = useCallback((g) => g.chars.every((c) => isCaptured(c)), [isCaptured]);
 
   const startBossFight = useCallback(() => {
-    const q = makeBossQuestion(grade);
-    setBoss({ gradeId, progress: 0, lives: BOSS_LIVES, question: q, locked: false, wrongIdx: null, result: null });
+    const bossData = bossForGrade(gradeId);
+    setBossCutIn(bossData);
+    setTimeout(() => {
+      setBossCutIn(null);
+      const q = makeBossQuestion(grade);
+      setBoss({ gradeId, progress: 0, lives: BOSS_LIVES, question: q, locked: false, wrongIdx: null, result: null });
+    }, 1300);
   }, [grade, gradeId]);
 
   const closeBossFight = useCallback(() => {
@@ -3014,6 +3164,35 @@ function AppInner() {
   return (
     <div style={styles.app}>
       <GlobalStyle />
+
+      {/* ---------- ボス しゅつげん カットイン ---------- */}
+      {bossCutIn && (
+        <div style={styles.cutInOverlay}>
+          <div className="cutin-lines-boss" style={styles.cutInLinesBoss} />
+          <div className="cutin-flash-boss" style={styles.cutInFlashBoss} />
+          <div className="cutin-content" style={styles.cutInContent}>
+            <BossCreature boss={bossCutIn} size={150} />
+            <div className="cutin-title" style={styles.cutInBossTitle}>
+              {bossCutIn.name}
+            </div>
+            <div style={styles.cutInBossSub}>しゅつげん！！</div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- ゆうしゃ しんか えんしゅつ ---------- */}
+      {heroEvolveEffect && (
+        <div style={styles.cutInOverlay}>
+          <div className="evolve-flash" style={styles.evolveFlash} />
+          <div className="cutin-content" style={styles.cutInContent}>
+            <HeroAvatar equipped={equipmentByChar.hero || {}} size={150} level={heroEvolveEffect.level} />
+            <div className="cutin-title" style={styles.evolveTitle}>
+              しんか！
+            </div>
+            <div style={styles.evolveSub}>「{heroEvolveEffect.title}」に なった！</div>
+          </div>
+        </div>
+      )}
 
       {/* ---------- ヘッダー ---------- */}
       <header style={styles.header}>
@@ -3621,10 +3800,46 @@ function GlobalStyle() {
         50% { box-shadow: 0 0 10px 3px rgba(255,213,74,0.8); }
       }
       .mastered-glow { animation: masteredGlow 2.2s ease-in-out infinite; }
+      @keyframes cutinContentIn {
+        0% { transform: scale(0.4) translateY(20px); opacity: 0; }
+        55% { transform: scale(1.12) translateY(-4px); opacity: 1; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+      }
+      .cutin-content { animation: cutinContentIn 0.5s cubic-bezier(.2,.8,.3,1) both; }
+      @keyframes cutinTitleShake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-4px) rotate(-1deg); }
+        40% { transform: translateX(4px) rotate(1deg); }
+        60% { transform: translateX(-3px); }
+        80% { transform: translateX(3px); }
+      }
+      .cutin-title { animation: cutinTitleShake 0.5s ease-in-out 0.4s; }
+      @keyframes cutinFlashFade {
+        0% { opacity: 0.95; }
+        100% { opacity: 0; }
+      }
+      .cutin-flash-boss { animation: cutinFlashFade 0.5s ease-out forwards; }
+      @keyframes cutinLinesSweep {
+        0% { transform: translateX(-60%) skewX(-12deg); opacity: 0.9; }
+        100% { transform: translateX(60%) skewX(-12deg); opacity: 0; }
+      }
+      .cutin-lines-boss { animation: cutinLinesSweep 0.7s ease-out forwards; }
+      @keyframes evolveFlashFade {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+      .evolve-flash { animation: evolveFlashFade 0.8s ease-out forwards; }
+      @keyframes evolveSparkleSpin {
+        0% { transform: rotate(0deg) scale(0.9); opacity: 0.5; }
+        50% { transform: rotate(180deg) scale(1.1); opacity: 0.9; }
+        100% { transform: rotate(360deg) scale(0.9); opacity: 0.5; }
+      }
+      .evolve-ring { animation: evolveSparkleSpin 1.8s linear infinite; }
       button { font-family: inherit; }
       button:focus-visible { outline: 3px solid #ffd37a; outline-offset: 2px; }
       @media (prefers-reduced-motion: reduce) {
         .monster-pop { animation: none !important; }
+        .cutin-content, .cutin-title, .cutin-flash-boss, .cutin-lines-boss, .evolve-flash, .evolve-ring { animation: none !important; }
       }
     `}</style>
   );
@@ -3635,6 +3850,57 @@ function GlobalStyle() {
 /* ================================================================== */
 
 const styles = {
+  cutInOverlay: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 200,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "rgba(6,4,16,0.88)",
+    overflow: "hidden",
+  },
+  cutInFlashBoss: {
+    position: "absolute",
+    inset: 0,
+    background: "radial-gradient(circle at 50% 45%, #ff9a5c 0%, #6a1420 55%, transparent 80%)",
+    pointerEvents: "none",
+  },
+  cutInLinesBoss: {
+    position: "absolute",
+    top: "-20%",
+    left: 0,
+    width: "160%",
+    height: "140%",
+    background: "repeating-linear-gradient(100deg, rgba(255,122,80,0.5) 0px, rgba(255,122,80,0.5) 3px, transparent 3px, transparent 24px)",
+    pointerEvents: "none",
+  },
+  cutInContent: { position: "relative", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, zIndex: 2 },
+  cutInBossTitle: {
+    fontFamily: "'Yusei Magic', sans-serif",
+    fontSize: 22,
+    color: "#fff",
+    textShadow: "0 0 12px #ff5a36, 0 2px 0 #241f33",
+    textAlign: "center",
+    marginTop: 4,
+  },
+  cutInBossSub: { fontFamily: "'Yusei Magic', sans-serif", fontSize: 15, color: "#ffd37a", textAlign: "center" },
+  evolveFlash: {
+    position: "absolute",
+    inset: 0,
+    background: "radial-gradient(circle at 50% 45%, #fff6d5 0%, #ffd37a 40%, transparent 75%)",
+    pointerEvents: "none",
+  },
+  evolveTitle: {
+    fontFamily: "'Yusei Magic', sans-serif",
+    fontSize: 24,
+    color: "#fff6d5",
+    textShadow: "0 0 14px #ffd37a, 0 2px 0 #241f33",
+    textAlign: "center",
+    marginTop: 4,
+  },
+  evolveSub: { fontFamily: "'Yusei Magic', sans-serif", fontSize: 15, color: "#fff", textAlign: "center" },
   loadingScreen: { minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#191830" },
   profileScreen: {
     minHeight: "100vh",

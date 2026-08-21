@@ -1790,8 +1790,7 @@ function bossForGrade(gradeId) {
   return BOSSES.find((b) => b.grade === gradeId);
 }
 
-const BOSS_ROUNDS = 5;
-const BOSS_LIVES = 3;
+const BOSS_ROUNDS = 10;
 const BOSS_WIN_GOLD = 200;
 
 function BossLion({ boss }) {
@@ -2775,37 +2774,6 @@ function AppInner() {
     selectProfile(name);
   }, [newNameInput, profileList, selectProfile]);
 
-  const createBossTestProfile = useCallback(async () => {
-    const name = "ボステスト";
-    const grade1 = GRADES.find((g) => g.id === 1);
-    const testProgress = {};
-    grade1.chars.forEach((c) => {
-      testProgress[c] = { reading: true, meaning: true, write: true };
-    });
-    const payload = {
-      progress: testProgress,
-      heroExp: 400,
-      party: ["seiryu", "byakko", "suzaku"],
-      partySetupDone: true,
-      gold: 500,
-      inventoryByChar: {},
-      equipmentByChar: {},
-      bossDefeated: {},
-    };
-    try {
-      await window.storage.set(saveKeyFor(name), JSON.stringify(payload), true);
-    } catch (e) {}
-    let nextList = profileList;
-    if (!profileList.includes(name)) {
-      nextList = [...profileList, name];
-      setProfileList(nextList);
-      try {
-        await window.storage.set(PROFILES_KEY, JSON.stringify(nextList), true);
-      } catch (e) {}
-    }
-    selectProfile(name);
-  }, [profileList, selectProfile]);
-
   const switchProfile = useCallback(() => {
     setProfile(null);
     setLoaded(false);
@@ -3025,7 +2993,7 @@ function AppInner() {
     setTimeout(() => {
       setBossCutIn(null);
       const q = makeBossQuestion(grade);
-      setBoss({ gradeId, progress: 0, lives: BOSS_LIVES, question: q, locked: false, wrongIdx: null, result: null });
+      setBoss({ gradeId, progress: 0, question: q, locked: false, wrongIdx: null, result: null });
     }, 1300);
   }, [grade, gradeId]);
 
@@ -3057,24 +3025,11 @@ function AppInner() {
           });
         }, 700);
       } else {
-        const newLives = boss.lives - 1;
-        if (newLives <= 0) {
-          setBoss({ ...boss, lives: newLives, wrongIdx: i, locked: true, result: "lose" });
-          return;
-        }
-        setBoss({ ...boss, lives: newLives, wrongIdx: i, locked: true, result: "miss" });
-        setTimeout(() => {
-          setBoss((prev) => {
-            if (!prev || prev.result !== "miss") return prev;
-            const q = makeBossQuestion(grade);
-            return { ...prev, question: q, locked: false, wrongIdx: null, result: null };
-          });
-        }, 700);
+        setBoss({ ...boss, wrongIdx: i, locked: true, result: "lose" });
       }
     },
     [boss, bossDefeated, gold, persistAll, grade]
   );
-
 
   const buyOrEquip = useCallback(
     (char, slot, item) => {
@@ -3190,13 +3145,6 @@ function AppInner() {
           {profileError && <div style={{ color: "#ff9a9e", fontSize: 12 }}>{profileError}</div>}
           <div style={{ fontSize: 11, opacity: 0.6, textAlign: "center", maxWidth: 280 }}>
             ここで えらんだ なまえの きろくは、どの ブラウザから ひらいても おなじように つづきから あそべるよ。
-          </div>
-
-          <button style={styles.devTestBtn} onClick={createBossTestProfile}>
-            🧪 ボスせん テストよう データを つくる
-          </button>
-          <div style={{ fontSize: 10, opacity: 0.5, textAlign: "center", maxWidth: 280 }}>
-            「ボステスト」という なまえで、1年生が ぜんぶ 金色の じょうたいの データを つくって すぐに あそべます（かくにん・テストよう）
           </div>
         </div>
       </div>
@@ -3390,13 +3338,6 @@ function AppInner() {
                   <BossCreature boss={bossData} size={170} />
                 </div>
                 <div style={styles.bossStatusRow}>
-                  <div style={styles.bossLivesRow}>
-                    {Array.from({ length: BOSS_LIVES }).map((_, i) => (
-                      <span key={i} style={{ opacity: i < boss.lives ? 1 : 0.25 }}>
-                        ❤️
-                      </span>
-                    ))}
-                  </div>
                   <div style={styles.bossProgressRow}>
                     {Array.from({ length: BOSS_ROUNDS }).map((_, i) => (
                       <span key={i} style={{ opacity: i < boss.progress ? 1 : 0.25 }}>
@@ -3430,10 +3371,6 @@ function AppInner() {
                 ) : boss.result === "hit" ? (
                   <div style={styles.bannerWrap}>
                     <div style={styles.bannerReview}>やった！ こうげき せいこう！</div>
-                  </div>
-                ) : boss.result === "miss" ? (
-                  <div style={styles.bannerWrap}>
-                    <div style={styles.bannerMissed}>ざんねん…！ こうげきが はずれた…</div>
                   </div>
                 ) : (
                   <>
@@ -4053,17 +3990,6 @@ const styles = {
     outline: "none",
   },
   profileSwitchLink: { background: "none", border: "none", color: "#b8b0ec", fontSize: 10, cursor: "pointer", padding: 0, textAlign: "left" },
-  devTestBtn: {
-    marginTop: 18,
-    background: "#1c1a3d",
-    border: "1px dashed #4b477f",
-    borderRadius: 999,
-    padding: "8px 16px",
-    color: "#b8b0ec",
-    fontSize: 11,
-    fontWeight: 700,
-    cursor: "pointer",
-  },
   app: {
     minHeight: "100vh",
     background: "radial-gradient(circle at 15% 10%, #23214a 0%, #191830 45%, #100f22 100%)",

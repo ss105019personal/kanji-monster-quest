@@ -1966,12 +1966,18 @@ function statsLabel(item) {
   return parts.join(" ");
 }
 
-function HeroAuraGlow({ tier }) {
-  if (tier < 3) return null;
-  const palette = { 3: "#c98cff", 4: "#c98cff", 5: "#9fd6ff", 6: "#7fe3ff", 7: "#7fe3ff", 8: "#ffd24d", 9: "#ffd24d", 10: "#ffe9a8" };
-  const opacityMap = { 3: 0.1, 4: 0.14, 5: 0.16, 6: 0.18, 7: 0.2, 8: 0.24, 9: 0.28, 10: 0.36 };
-  return <circle cx="70" cy="90" r="95" fill={palette[tier]} opacity={opacityMap[tier]} />;
-}
+const HERO_TIER_CONFIG = {
+  1: { els: [], mount: 0, wing: 0, cape: 1, capeColor: ["#5a3f52", "#7a5468"], halo: false, sparkle: 0, aura: null },
+  2: { els: [], mount: 0, wing: 0, cape: 1, capeColor: ["#3d5a3f", "#5e8a63"], halo: false, sparkle: 0, aura: null },
+  3: { els: ["water"], mount: 0, wing: 0, cape: 1, capeColor: ["#2e4a63", "#3d6a8f"], halo: false, sparkle: 0, aura: "#57C7F5" },
+  4: { els: ["water", "thunder"], mount: 0, wing: 0, cape: 2, capeColor: ["#3d3a63", "#6a5e9f"], halo: false, sparkle: 0, aura: "#FFE066" },
+  5: { els: ["water", "thunder", "fire"], mount: 0, wing: 0.95, cape: 2, capeColor: ["#8f2e1a", "#ff8a5c"], halo: false, sparkle: 0, aura: "#FF7A50" },
+  6: { els: ["water", "thunder", "fire", "earth"], mount: 0, wing: 1.15, cape: 2, capeColor: ["#4a3620", "#8a6a3f"], halo: false, sparkle: 0, aura: "#D3A45E" },
+  7: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 0, wing: 1.25, cape: 3, capeColor: ["#2f5e1c", "#8fcb4e"], halo: false, sparkle: 0, aura: "#8FCB4E" },
+  8: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 1, wing: 1.3, cape: 3, capeColor: ["#5a2f8f", "#a76aff"], halo: false, sparkle: 2, aura: "#c98cff" },
+  9: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 2, wing: 1.4, cape: 3, capeColor: ["#9a7a1e", "#ffe9a8"], halo: true, sparkle: 5, aura: "#ffd24d" },
+  10: { els: ["water", "thunder", "fire", "earth", "grass"], mount: 3, wing: 1.55, cape: 3, capeColor: ["#c9a24d", "#fff6d5"], halo: true, sparkle: 8, aura: null, legend: true },
+};
 
 function HeroLegendBurst({ tier }) {
   if (tier < 10) return null;
@@ -1985,57 +1991,203 @@ function HeroLegendBurst({ tier }) {
   );
 }
 
-function HeroWings({ tier }) {
-  if (tier < 5) return null;
-  const scale = tier >= 10 ? 1.25 : tier >= 8 ? 1.1 : tier >= 6 ? 1.0 : 0.72;
-  const color = tier >= 9 ? "#ffe9a8" : tier >= 7 ? "#ffd24d" : "#7fe3ff";
+function HeroWings({ tier, wingScale }) {
+  if (!wingScale) return null;
+  const color = tier >= 10 ? "#fff6d5" : tier >= 9 ? "#ffe9a8" : tier >= 7 ? "#8fcb4e" : tier >= 5 ? "#ff8a5c" : "#7fe3ff";
   return (
-    <g style={{ transform: `scale(${scale})`, transformOrigin: "70px 60px" }}>
-      <g fill={color} stroke={OUTLINE} strokeWidth="2.5" opacity="0.92">
-        <path d="M40,72 C6,62 -16,28 -4,-6 C12,20 28,44 46,60 Z" />
-        <path d="M100,72 C134,62 156,28 144,-6 C128,20 112,44 94,60 Z" />
+    <g style={{ transform: `scale(${wingScale})`, transformOrigin: "70px 60px" }}>
+      <g fill={color} stroke={OUTLINE} strokeWidth="2.5" opacity="0.95">
+        <path d="M40,72 C0,60 -22,20 -6,-14 C12,16 30,42 46,60 Z" />
+        <path d="M100,72 C140,60 162,20 146,-14 C128,16 110,42 94,60 Z" />
+        <path d="M40,66 C14,58 0,34 8,10" fill="none" stroke={color} strokeWidth="1.5" opacity="0.6" />
+        <path d="M100,66 C126,58 140,34 132,10" fill="none" stroke={color} strokeWidth="1.5" opacity="0.6" />
       </g>
     </g>
   );
 }
 
-function HeroCrown({ tier }) {
-  if (tier < 7) return null;
-  if (tier < 8) {
+function HeroCape({ colorA, colorB, size }) {
+  if (size === 2) {
     return (
-      <g fill="#ffd24d" stroke={OUTLINE} strokeWidth="1.6">
-        <rect x="54" y="4" width="32" height="7" rx="3.5" />
-        <circle cx="70" cy="7.5" r="2.6" fill="#fff6d5" stroke={OUTLINE} strokeWidth="1" />
+      <>
+        <path
+          d="M38,56 C14,66 -2,106 6,158 C24,172 44,180 60,182 C76,180 96,172 114,158 C122,106 106,66 82,56 C74,64 66,68 60,68 C54,68 46,64 38,56 Z"
+          fill={colorA}
+          stroke={OUTLINE}
+          strokeWidth="3"
+        />
+        <path d="M38,56 C32,92 32,138 42,172" stroke={colorB} strokeWidth="2.5" fill="none" opacity="0.65" />
+        <path d="M82,56 C88,92 88,138 78,172" stroke={colorB} strokeWidth="2.5" fill="none" opacity="0.65" />
+        <path d="M38,56 L60,68 L82,56" fill="none" stroke={colorB} strokeWidth="2.5" opacity="0.8" />
+      </>
+    );
+  }
+  if (size >= 3) {
+    return (
+      <>
+        <path
+          d="M32,54 C4,66 -12,112 -2,168 C18,184 42,194 60,196 C78,194 102,184 122,168 C132,112 116,66 88,54 C78,64 68,68 60,68 C52,68 42,64 32,54 Z"
+          fill={colorA}
+          stroke={OUTLINE}
+          strokeWidth="3"
+        />
+        <g fill="#fdfaf3" opacity="0.95">
+          <ellipse cx="-2" cy="140" rx="10" ry="24" />
+          <ellipse cx="122" cy="140" rx="10" ry="24" />
+        </g>
+        <g fill="#2a2440">
+          <circle cx="-4" cy="120" r="2.6" />
+          <circle cx="0" cy="150" r="2.6" />
+          <circle cx="-4" cy="178" r="2.6" />
+          <circle cx="124" cy="120" r="2.6" />
+          <circle cx="120" cy="150" r="2.6" />
+          <circle cx="124" cy="178" r="2.6" />
+        </g>
+        <path d="M32,54 L60,68 L88,54" fill="none" stroke={colorB} strokeWidth="3" opacity="0.85" />
+      </>
+    );
+  }
+  return (
+    <>
+      <path
+        d="M44,58 C22,66 10,102 16,152 C30,164 46,170 60,172 C74,170 90,164 104,152 C110,102 98,66 76,58 C70,66 65,70 60,70 C55,70 50,66 44,58 Z"
+        fill={colorA}
+        stroke={OUTLINE}
+        strokeWidth="3"
+      />
+      <path d="M44,58 C40,90 40,130 48,160" stroke={colorB} strokeWidth="2" fill="none" opacity="0.6" />
+      <path d="M76,58 C80,90 80,130 72,160" stroke={colorB} strokeWidth="2" fill="none" opacity="0.6" />
+    </>
+  );
+}
+
+const HERO_ELEMENTS = {
+  water: { x: 2, y: 55, a: "#57C7F5", b: "#0C5C8C" },
+  thunder: { x: 138, y: 55, a: "#FFE066", b: "#B8860B" },
+  fire: { x: 2, y: 100, a: "#FF7A50", b: "#B5301A" },
+  earth: { x: 138, y: 100, a: "#D3A45E", b: "#7A4E27" },
+  grass: { x: 2, y: 145, a: "#8FCB4E", b: "#2F5E1C" },
+};
+function HeroElementOrb({ type }) {
+  const e = HERO_ELEMENTS[type];
+  let symbol;
+  if (type === "water") symbol = <path d="M0,-5 C3,-1 4,2 0,5 C-4,2 -3,-1 0,-5 Z" fill={e.b} />;
+  else if (type === "thunder") symbol = <path d="M-2,-5 L2,-5 L-1,0 L2,0 L-3,6 L-1,1 L-3,1 Z" fill={e.b} />;
+  else if (type === "fire") symbol = <path d="M0,-5 C3,-2 3,2 0,5 C-3,2 -2,-1 0,-5 Z" fill={e.b} />;
+  else if (type === "earth") symbol = <polygon points="-4,3 -2,-4 3,-4 5,2 1,5" fill={e.b} />;
+  else symbol = <path d="M0,-5 Q5,0 0,5 Q-5,0 0,-5 Z" fill={e.b} />;
+  return (
+    <g transform={`translate(${e.x},${e.y})`}>
+      <circle r="9" fill={e.a} stroke={OUTLINE} strokeWidth="2" />
+      {symbol}
+    </g>
+  );
+}
+function HeroElements({ list }) {
+  return (
+    <>
+      {list.map((k) => (
+        <HeroElementOrb key={k} type={k} />
+      ))}
+    </>
+  );
+}
+
+function HeroMount({ kind }) {
+  if (kind === 0) return null;
+  if (kind === 1) {
+    return (
+      <g>
+        <ellipse cx="70" cy="184" rx="40" ry="9" fill="#7a3fbf" stroke={OUTLINE} strokeWidth="2.5" />
+        <ellipse cx="70" cy="184" rx="40" ry="9" fill="none" stroke="#ffd37a" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.8" />
+        <circle cx="34" cy="184" r="2.5" fill="#ffd37a" />
+        <circle cx="106" cy="184" r="2.5" fill="#ffd37a" />
+      </g>
+    );
+  }
+  if (kind === 2) {
+    return (
+      <g>
+        <ellipse cx="70" cy="185" rx="46" ry="10" fill="#7a3fbf" stroke={OUTLINE} strokeWidth="2.5" />
+        <ellipse cx="70" cy="185" rx="46" ry="10" fill="none" stroke="#ffe9a8" strokeWidth="2" strokeDasharray="5 3" opacity="0.9" />
+        <circle cx="28" cy="185" r="3" fill="#ffe9a8" />
+        <circle cx="112" cy="185" r="3" fill="#ffe9a8" />
+        <path d="M40,185 Q70,178 100,185" stroke="#ffe9a8" strokeWidth="1.5" fill="none" opacity="0.8" />
       </g>
     );
   }
   return (
-    <g fill="#ffd24d" stroke={OUTLINE} strokeWidth="1.8">
-      <polygon points="52,-6 58,-20 63,-9 70,-24 77,-9 82,-20 88,-6" />
-      <circle cx="70" cy="-19" r="3" fill="#ff5a36" stroke={OUTLINE} strokeWidth="1.2" />
+    <g>
+      <ellipse cx="70" cy="192" rx="15" ry="6" fill="#ffe9a8" opacity="0.35" />
+      <ellipse cx="70" cy="188" rx="58" ry="15" fill="#ffffff" stroke={OUTLINE} strokeWidth="2.5" />
+      <ellipse cx="38" cy="184" rx="22" ry="13" fill="#ffffff" stroke={OUTLINE} strokeWidth="2.5" />
+      <ellipse cx="102" cy="184" rx="22" ry="13" fill="#ffffff" stroke={OUTLINE} strokeWidth="2.5" />
+      <ellipse cx="70" cy="180" rx="26" ry="14" fill="#ffffff" stroke={OUTLINE} strokeWidth="2.5" />
     </g>
   );
 }
 
-function HeroSparkles({ tier }) {
-  if (tier < 9) return null;
+function HeroCat({ tier, onCloud }) {
+  if (tier < 2) return null;
+  const color = tier >= 9 ? "#ffe9a8" : tier >= 7 ? "#8fcb4e" : tier >= 5 ? "#ff8a5c" : tier >= 3 ? "#7fe3ff" : "#c9a24d";
+  const hasWings = tier >= 5;
+  const hasHalo = tier >= 9;
+  const cx = onCloud ? 128 : 120;
+  const cy = onCloud ? 176 : 178;
+  return (
+    <g transform={`translate(${cx},${cy}) scale(1.9)`}>
+      {hasHalo && <ellipse cx="-8" cy="-24" rx="7" ry="2.6" fill="none" stroke="#ffe9a8" strokeWidth="2.2" opacity="0.9" />}
+      {hasWings && (
+        <g fill={color} stroke={OUTLINE} strokeWidth="1.4" opacity="0.92">
+          <path d="M-4,-3 C-14,-7 -18,-16 -12,-23 C-9,-14 -6,-7 -2,-1 Z" />
+          <path d="M4,-3 C14,-7 18,-16 12,-23 C9,-14 6,-7 2,-1 Z" />
+        </g>
+      )}
+      <path d="M6,4 Q16,-2 13,-11" stroke={color} strokeWidth="3" fill="none" strokeLinecap="round" />
+      <ellipse cx="-4" cy="2" rx="11" ry="8" fill={color} stroke={OUTLINE} strokeWidth="2" />
+      <circle cx="-11" cy="-9" r="7.5" fill={color} stroke={OUTLINE} strokeWidth="2" />
+      <polygon points="-17,-14 -15,-6 -11,-11" fill={color} stroke={OUTLINE} strokeWidth="1.2" />
+      <polygon points="-5,-14 -7,-6 -11,-11" fill={color} stroke={OUTLINE} strokeWidth="1.2" />
+      <path d="M-14,-9 L-13,-7 M-8,-9 L-9,-7" stroke={OUTLINE} strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M-11,-5 L-11,-4" stroke={OUTLINE} strokeWidth="1.4" strokeLinecap="round" />
+    </g>
+  );
+}
+
+function HeroHalo({ r }) {
+  return (
+    <>
+      <ellipse cx="70" cy="-45" rx={r} ry="7" fill="none" stroke="#ffe9a8" strokeWidth="4" opacity="0.9" />
+      <ellipse cx="70" cy="-45" rx={r} ry="7" fill="#ffe9a8" opacity="0.14" />
+    </>
+  );
+}
+
+function HeroSparkles({ count }) {
+  const pts = [
+    [2, 50],
+    [138, 60],
+    [10, 150],
+    [130, 160],
+    [70, 200],
+    [-10, 110],
+    [148, 100],
+    [30, -24],
+    [110, -24],
+    [45, -52],
+  ];
   return (
     <g fill="#fff6d5" opacity="0.95">
-      <circle cx="6" cy="46" r="3" />
-      <circle cx="134" cy="56" r="2.6" />
-      {tier >= 10 && (
-        <>
-          <circle cx="14" cy="150" r="2.6" />
-          <circle cx="126" cy="160" r="3" />
-          <circle cx="70" cy="-34" r="2.4" />
-        </>
-      )}
+      {pts.slice(0, count).map((p, i) => (
+        <circle key={i} cx={p[0]} cy={p[1]} r="3" />
+      ))}
     </g>
   );
 }
 
 function HeroAvatar({ equipped, size = 150, level = 1 }) {
   const tier = heroTierFromLevel(level);
+  const cfg = HERO_TIER_CONFIG[tier];
   const helmet = equipped.helmet && itemById("helmet", equipped.helmet);
   const body = equipped.body && itemById("body", equipped.body);
   const shoes = equipped.shoes && itemById("shoes", equipped.shoes);
@@ -2043,24 +2195,29 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
   const shield = equipped.shield && itemById("shield", equipped.shield);
 
   const armorColor = body ? body.color : "#6b6878";
-  const armorDark = body ? "#20202a" : "#3f3d4a";
   const bootColor = shoes ? shoes.color : "#45424f";
 
   return (
     <svg viewBox="0 0 140 190" width={size} height={size * (190 / 140)} style={{ overflow: "visible" }}>
+      {cfg.legend && (
+        <defs>
+          <linearGradient id="heroRainbow" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#ff9a9e" />
+            <stop offset="25%" stopColor="#ffd37a" />
+            <stop offset="50%" stopColor="#a8edea" />
+            <stop offset="75%" stopColor="#c98cff" />
+            <stop offset="100%" stopColor="#7fe3ff" />
+          </linearGradient>
+        </defs>
+      )}
       <HeroLegendBurst tier={tier} />
-      <HeroAuraGlow tier={tier} />
-      <HeroWings tier={tier} />
-
-      {/* マント */}
-      <path
-        d="M44,58 C22,66 10,102 16,152 C30,164 46,170 60,172 C74,170 90,164 104,152 C110,102 98,66 76,58 C70,66 65,70 60,70 C55,70 50,66 44,58 Z"
-        fill="#6a1420"
-        stroke={OUTLINE}
-        strokeWidth="3"
-      />
-      <path d="M44,58 C40,90 40,130 48,160" stroke="#8f2230" strokeWidth="2" fill="none" opacity="0.6" />
-      <path d="M76,58 C80,90 80,130 72,160" stroke="#8f2230" strokeWidth="2" fill="none" opacity="0.6" />
+      {cfg.legend ? (
+        <circle cx="70" cy="90" r="98" fill="url(#heroRainbow)" opacity="0.4" />
+      ) : (
+        cfg.aura && <circle cx="70" cy="90" r="92" fill={cfg.aura} opacity="0.16" />
+      )}
+      <HeroWings tier={tier} wingScale={cfg.wing} />
+      <HeroCape colorA={cfg.capeColor[0]} colorB={cfg.capeColor[1]} size={cfg.cape} />
 
       {/* たて（むかって左うで） */}
       {shield && (
@@ -2087,38 +2244,36 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
       />
       <polygon points="70,84 78,94 70,104 62,94" fill="#e8c34a" stroke={OUTLINE} strokeWidth="2" />
 
-      {/* かたあて（パウルドロン） */}
-      <polygon points="20,58 46,52 44,84 16,88" fill={armorDark} stroke={OUTLINE} strokeWidth="3" />
-      <polygon points="120,58 94,52 96,84 124,88" fill={armorDark} stroke={OUTLINE} strokeWidth="3" />
-      <polygon points="24,58 42,54 40,72 20,76" fill={armorColor} stroke={OUTLINE} strokeWidth="2" />
-      <polygon points="116,58 98,54 100,72 120,76" fill={armorColor} stroke={OUTLINE} strokeWidth="2" />
-
-      {/* あたま */}
+      {/* あたま（やさしい ひょうじょう・かみのけ なし） */}
       <ellipse cx="70" cy="38" rx="18" ry="20" fill="#f0bd8e" stroke={OUTLINE} strokeWidth="3" />
-      <path d="M60,36 L67,33 M73,33 L80,36" stroke={OUTLINE} strokeWidth="2.5" strokeLinecap="round" />
-      <path d="M56,50 Q70,58 84,50" stroke={OUTLINE} strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M59,32 Q64,29 69,32" stroke={OUTLINE} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M71,32 Q76,29 81,32" stroke={OUTLINE} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <ellipse cx="63" cy="37.5" rx="4.6" ry="4" fill="#fff" stroke={OUTLINE} strokeWidth="1.2" />
+      <ellipse cx="77" cy="37.5" rx="4.6" ry="4" fill="#fff" stroke={OUTLINE} strokeWidth="1.2" />
+      <circle cx="63.8" cy="38" r="2.4" fill="#3f7a8c" />
+      <circle cx="77.8" cy="38" r="2.4" fill="#3f7a8c" />
+      <circle cx="63.8" cy="38" r="1.1" fill="#1c2e33" />
+      <circle cx="77.8" cy="38" r="1.1" fill="#1c2e33" />
+      <circle cx="64.7" cy="36.9" r="1" fill="#fff" />
+      <circle cx="78.7" cy="36.9" r="1" fill="#fff" />
+      <path d="M62,48 Q70,53 78,48" stroke={OUTLINE} strokeWidth="2.2" strokeLinecap="round" fill="none" />
 
-      {helmet ? (
+      {helmet && (
         <g>
           <path
-            d="M48,26 C48,4 92,4 92,26 L94,46 L84,46 L82,34 L58,34 L56,46 L46,46 Z"
+            d="M48,13 C48,-9 92,-9 92,13 L94,33 L84,33 L82,21 L58,21 L56,33 L46,33 Z"
             fill={helmet.color}
             stroke={OUTLINE}
             strokeWidth="3"
           />
-          <rect x="46" y="36" width="48" height="7" rx="3" fill="#1c1a24" stroke={OUTLINE} strokeWidth="2" />
-          <polygon points="66,4 70,-14 74,4" fill="#e8483a" stroke={OUTLINE} strokeWidth="2" />
+          <rect x="46" y="23" width="48" height="7" rx="3" fill="#1c1a24" stroke={OUTLINE} strokeWidth="2" />
+          <polygon points="66,-9 70,-27 74,-9" fill="#e8483a" stroke={OUTLINE} strokeWidth="2" />
         </g>
-      ) : (
-        <path
-          d="M48,24 C46,4 60,-6 70,-6 C80,-6 94,4 92,24 C86,14 78,10 70,10 C62,10 54,14 48,24 Z"
-          fill="#3a2a1a"
-          stroke={OUTLINE}
-          strokeWidth="3"
-        />
       )}
 
-      <HeroCrown tier={tier} />
+      <HeroElements list={cfg.els} />
+      <HeroMount kind={cfg.mount} />
+      <HeroCat tier={tier} onCloud={cfg.mount === 3} />
 
       {/* けん（むかって右うで） */}
       {sword && (
@@ -2130,7 +2285,8 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
         </g>
       )}
 
-      <HeroSparkles tier={tier} />
+      {cfg.halo && <HeroHalo r={cfg.legend ? 24 : 20} />}
+      {cfg.sparkle > 0 && <HeroSparkles count={cfg.sparkle} />}
     </svg>
   );
 }

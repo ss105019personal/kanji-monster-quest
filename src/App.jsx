@@ -2187,6 +2187,8 @@ const EQUIPMENT = {
     { id: "helmet_legend", name: "でんせつの かぶと", cost: 400, color: "#ffb703", wis: 24, def: 12 },
     { id: "helmet_myth", name: "しんわの かぶと", cost: 500, color: "#5be3ff", mythic: true, wis: 32, def: 16 },
     { id: "helmet_genesis", name: "そうせいの かぶと", cost: 1000, color: "#fff3b0", genesis: true, wis: 45, def: 22 },
+    { id: "helmet_dragonking", name: "りゅうおうの かぶと", cost: 5000, color: "#c0392b", dragonking: true, wis: 70, def: 34 },
+    { id: "helmet_divine", name: "かみの かぶと", cost: 10000, color: "#fdf6ec", divine: true, wis: 108, def: 53 },
   ],
   body: [
     { id: "body_cloth", name: "ぬのの ふく", cost: 25, color: "#8ec0e4", def: 3, atk: 1 },
@@ -2196,6 +2198,8 @@ const EQUIPMENT = {
     { id: "body_legend", name: "でんせつの よろい", cost: 400, color: "#ffb703", def: 24, atk: 6 },
     { id: "body_myth", name: "しんわの よろい", cost: 500, color: "#5be3ff", mythic: true, def: 32, atk: 8 },
     { id: "body_genesis", name: "そうせいの よろい", cost: 1000, color: "#fff3b0", genesis: true, def: 45, atk: 11 },
+    { id: "body_dragonking", name: "りゅうおうの よろい", cost: 5000, color: "#c0392b", dragonking: true, def: 70, atk: 17 },
+    { id: "body_divine", name: "かみの よろい", cost: 10000, color: "#fdf6ec", divine: true, def: 108, atk: 26 },
   ],
   shoes: [
     { id: "shoes_leather", name: "かわのくつ", cost: 20, color: "#7a5230", spd: 3, def: 1 },
@@ -2205,6 +2209,8 @@ const EQUIPMENT = {
     { id: "shoes_legend", name: "でんせつの ぐそく", cost: 400, color: "#ffb703", spd: 24, def: 6 },
     { id: "shoes_myth", name: "しんわの ぐそく", cost: 500, color: "#5be3ff", mythic: true, spd: 32, def: 8 },
     { id: "shoes_genesis", name: "そうせいの ぐそく", cost: 1000, color: "#fff3b0", genesis: true, spd: 45, def: 11 },
+    { id: "shoes_dragonking", name: "りゅうおうの ぐそく", cost: 5000, color: "#c0392b", dragonking: true, spd: 70, def: 17 },
+    { id: "shoes_divine", name: "かみの ぐそく", cost: 10000, color: "#fdf6ec", divine: true, spd: 108, def: 26 },
   ],
   sword: [
     { id: "sword_wood", name: "きの ぼう", cost: 15, color: "#a9743a", atk: 3, spd: 1 },
@@ -2214,6 +2220,8 @@ const EQUIPMENT = {
     { id: "sword_legend", name: "でんせつの けん", cost: 400, color: "#ffb703", atk: 24, spd: 12 },
     { id: "sword_myth", name: "しんわの けん", cost: 500, color: "#5be3ff", mythic: true, atk: 32, spd: 16 },
     { id: "sword_genesis", name: "そうせいの けん", cost: 1000, color: "#fff3b0", genesis: true, atk: 45, spd: 22 },
+    { id: "sword_dragonking", name: "りゅうおうの けん", cost: 5000, color: "#c0392b", dragonking: true, atk: 70, spd: 34 },
+    { id: "sword_divine", name: "かみの けん", cost: 10000, color: "#fdf6ec", divine: true, atk: 108, spd: 53 },
   ],
   shield: [
     { id: "shield_wood", name: "きの たて", cost: 15, color: "#a9743a", def: 3, wis: 1 },
@@ -2223,6 +2231,8 @@ const EQUIPMENT = {
     { id: "shield_legend", name: "でんせつの たて", cost: 400, color: "#ffb703", def: 24, wis: 6 },
     { id: "shield_myth", name: "しんわの たて", cost: 500, color: "#5be3ff", mythic: true, def: 32, wis: 8 },
     { id: "shield_genesis", name: "そうせいの たて", cost: 1000, color: "#fff3b0", genesis: true, def: 45, wis: 11 },
+    { id: "shield_dragonking", name: "りゅうおうの たて", cost: 5000, color: "#c0392b", dragonking: true, def: 70, wis: 17 },
+    { id: "shield_divine", name: "かみの たて", cost: 10000, color: "#fdf6ec", divine: true, def: 108, wis: 26 },
   ],
 };
 
@@ -3837,14 +3847,24 @@ function AppInner() {
                             ...(isEquipped ? styles.shopItemEquipped : {}),
                             ...(!owned && !affordable ? styles.shopItemDisabled : {}),
                           }}
-                          className={item.genesis ? "genesis-glow" : item.mythic ? "mythic-glow" : ""}
+                          className={
+                            item.divine
+                              ? "divine-glow"
+                              : item.dragonking
+                              ? "dragonking-glow"
+                              : item.genesis
+                              ? "genesis-glow"
+                              : item.mythic
+                              ? "mythic-glow"
+                              : ""
+                          }
                         >
                           <div
                             style={{
                               ...styles.shopItemSwatch,
                               background: item.color,
                             }}
-                            className={item.genesis ? "genesis-swatch" : ""}
+                            className={item.genesis ? "genesis-swatch" : item.divine ? "divine-swatch" : ""}
                           />
                           <div style={styles.shopItemName}>{item.name}</div>
                           <div style={styles.shopItemStats}>{statsLabel(item)}</div>
@@ -3933,6 +3953,25 @@ function GlobalStyle() {
         background-size: 300% 100% !important;
         animation: genesisSpin 3s linear infinite;
       }
+      @keyframes dragonkingGlow {
+        0%, 100% { box-shadow: 0 0 8px 2px rgba(224,57,43,0.6), 0 0 18px 4px rgba(255,140,50,0.35); }
+        50% { box-shadow: 0 0 22px 7px rgba(224,57,43,0.95), 0 0 34px 10px rgba(255,140,50,0.65); }
+      }
+      .dragonking-glow { animation: dragonkingGlow 1.5s ease-in-out infinite; border-color: #ff8c32 !important; }
+      @keyframes divineGlow {
+        0%, 100% { box-shadow: 0 0 10px 3px rgba(255,246,224,0.7), 0 0 24px 8px rgba(255,214,120,0.4); }
+        50% { box-shadow: 0 0 26px 9px rgba(255,246,224,1), 0 0 44px 14px rgba(255,214,120,0.75); }
+      }
+      .divine-glow { animation: divineGlow 1.3s ease-in-out infinite; border-color: #fff6e0 !important; }
+      @keyframes divineSpin {
+        0% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+        100% { background-position: 200% 50%; filter: hue-rotate(30deg); }
+      }
+      .divine-swatch {
+        background: linear-gradient(90deg,#fff6e0,#ffe9a8,#fffdf5,#ffe9a8,#fff6e0) !important;
+        background-size: 300% 100% !important;
+        animation: divineSpin 2.2s linear infinite alternate;
+      }
       @keyframes masteredGlow {
         0%, 100% { box-shadow: 0 0 4px 1px rgba(255,213,74,0.45); }
         50% { box-shadow: 0 0 10px 3px rgba(255,213,74,0.8); }
@@ -3978,6 +4017,7 @@ function GlobalStyle() {
       @media (prefers-reduced-motion: reduce) {
         .monster-pop { animation: none !important; }
         .cutin-content, .cutin-title, .cutin-flash-boss, .cutin-lines-boss, .evolve-flash, .evolve-ring { animation: none !important; }
+        .dragonking-glow, .divine-glow, .divine-swatch { animation: none !important; }
       }
     `}</style>
   );

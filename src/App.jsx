@@ -2926,6 +2926,19 @@ function AppInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loaded, screen]);
 
+  const recordMistake = useCallback(
+    (char, mode) => {
+      const prev = progress[char] || { reading: false, meaning: false, write: false };
+      const flagKey = mode === "reading" ? "missReading" : mode === "meaning" ? "missMeaning" : "missWrite";
+      if (prev[flagKey]) return; // すでに きろくずみ
+      const updated = { ...prev, [flagKey]: true };
+      const nextProgress = { ...progress, [char]: updated };
+      setProgress(nextProgress);
+      persistAll({ progress: nextProgress });
+    },
+    [progress, persistAll]
+  );
+
   const grantSuccess = useCallback(
     (char, mode) => {
       const prev = progress[char] || { reading: false, meaning: false, write: false };
@@ -2982,13 +2995,14 @@ function AppInner() {
         setWrongIdx(i);
         setShakeCard(true);
         setMissed(true);
+        recordMistake(question.char, question.mode);
         setTimeout(() => {
           setShakeCard(false);
           nextQuestion();
         }, 900);
       }
     },
-    [locked, question, grantSuccess, nextQuestion]
+    [locked, question, grantSuccess, nextQuestion, recordMistake]
   );
 
   const onWriteDone = useCallback(() => {
@@ -3001,10 +3015,11 @@ function AppInner() {
     if (locked || !question) return;
     setLocked(true);
     setMissed(true);
+    recordMistake(question.char, "write");
     setTimeout(() => {
       nextQuestion();
     }, 900);
-  }, [locked, question, nextQuestion]);
+  }, [locked, question, nextQuestion, recordMistake]);
 
   /* --- がくねんマスターボス --- */
   const gradeFullyMastered = useCallback((g) => g.chars.every((c) => isCaptured(c)), [isCaptured]);
@@ -3342,6 +3357,12 @@ function AppInner() {
         >
           🛡 そうび
         </button>
+        <button
+          onClick={() => setScreen("mistakes")}
+          style={{ ...styles.modeBtn, ...(screen === "mistakes" ? styles.modeBtnActive : {}) }}
+        >
+          ❗ にがて
+        </button>
       </div>
 
       {/* ---------- バトル（クイズ／かきとり／ボスせん） ---------- */}
@@ -3553,6 +3574,63 @@ function AppInner() {
           </div>
         </main>
       )}
+
+      {/* ---------- にがてリスト ---------- */}
+      {screen === "mistakes" &&
+        (() => {
+          const gradeMistakes = GRADES.map((g) => ({
+            grade: g,
+            chars: g.chars.filter((c) => {
+              const p = progress[c];
+              return p && (p.missReading || p.missMeaning || p.missWrite);
+            }),
+          }));
+          const totalMistakes = gradeMistakes.reduce((sum, gm) => sum + gm.chars.length, 0);
+          return (
+            <main style={styles.zukanArea}>
+              <div style={styles.wildLabel}>いままで まちがえた もんだい（学年べつ）</div>
+              {totalMistakes === 0 ? (
+                <div style={{ textAlign: "center", opacity: 0.7, fontSize: 13, padding: 20 }}>
+                  まだ まちがえた もんだいは ないよ。すごい！
+                </div>
+              ) : (
+                gradeMistakes.map(({ grade: g, chars }) => {
+                  if (chars.length === 0) return null;
+                  return (
+                    <div key={g.id} style={{ marginBottom: 20 }}>
+                      <div style={styles.zukanAreaHeader}>
+                        {g.label}（{chars.length}もん）
+                      </div>
+                      <div style={styles.zukanGrid}>
+                        {chars.map((c) => {
+                          const p = progress[c];
+                          const n = clearedCountOf(c);
+                          return (
+                            <button key={c} style={styles.zukanCard} onClick={() => n >= 3 && setDetail(c)}>
+                              <MonsterCreature char={c} clearedCount={n} size={56} />
+                              <div style={styles.zukanCardLabel}>{c}</div>
+                              <div style={styles.mistakeTagRow}>
+                                {p.missReading && (
+                                  <span style={{ ...styles.mistakeTag, ...(p.reading ? styles.mistakeTagCleared : {}) }}>🔤</span>
+                                )}
+                                {p.missMeaning && (
+                                  <span style={{ ...styles.mistakeTag, ...(p.meaning ? styles.mistakeTagCleared : {}) }}>💭</span>
+                                )}
+                                {p.missWrite && (
+                                  <span style={{ ...styles.mistakeTag, ...(p.write ? styles.mistakeTagCleared : {}) }}>✏️</span>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </main>
+          );
+        })()}
 
       {/* ---------- 図鑑 ---------- */}
       {screen === "zukan" && (
@@ -4343,6 +4421,15 @@ const styles = {
     lineHeight: 1,
   },
   miniChecklistDotDone: { opacity: 1, filter: "none" },
+  mistakeTagRow: { display: "flex", gap: 3, marginTop: 2 },
+  mistakeTag: {
+    fontSize: 10,
+    background: "#4a2020",
+    border: "1px solid #8a3a3a",
+    borderRadius: 6,
+    padding: "1px 4px",
+  },
+  mistakeTagCleared: { background: "#20402a", border: "1px solid #3a8a5a", opacity: 0.7 },
   zukanCardType: { fontSize: 9, opacity: 0.7 },
   levelBadge: { fontSize: 11, fontWeight: 800, background: "#3a3770", color: "#ffd37a", padding: "2px 10px", borderRadius: 999, marginTop: 4 },
   modalOverlay: { position: "fixed", inset: 0, background: "rgba(10,9,25,0.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, zIndex: 50 },

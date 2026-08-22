@@ -296,7 +296,7 @@ const GRADE3_RAW = `
 区|ク||くぎられた ちいき|区役所|くやくしょ|earth
 苦|ク|くるしい,にがい|つらい、にがい|苦手|にがて|spirit
 具|グ||どうぐ|道具|どうぐ|craft
-君|クン|きみ||君主|くんしゅ|life
+君|クン|きみ|あいてを よぶ ことば|君主|くんしゅ|life
 係|ケイ|かかる|うけもち、がかり|係員|かかりいん|spirit
 軽|ケイ|かるい|おもさが かるい|軽食|けいしょく|craft
 血|ケツ|ち|からだの ち|血液|けつえき|life
@@ -388,7 +388,7 @@ const GRADE3_RAW = `
 鉄|テツ||かたい きんぞく|鉄道|てつどう|metal
 転|テン|ころがる,ころぶ|ころがる こと|自転車|じてんしゃ|craft
 都|ト,ツ|みやこ|おおきな まち|都会|とかい|earth
-度|ド,ト|たび||温度|おんど|spirit
+度|ド,ト|たび|かいすう、ものさし|温度|おんど|spirit
 投|トウ|なげる|なげる こと|投手|とうしゅ|life
 豆|トウ,ズ|まめ|たべる まめ|大豆|だいず|wood
 島|トウ|しま|うみに かこまれた しま|半島|はんとう|earth
@@ -857,7 +857,7 @@ const GRADE5_RAW = `
 
 const GRADE6_RAW = `
 胃|イ||からだの ぶぶん|胃腸|いちょう|life
-異|イ|こと|ちがう こと|異常|いじょう|spirit
+異|イ|ことなる|ちがう こと|異常|いじょう|spirit
 遺|イ,ユイ||のこす こと|遺産|いさん|spirit
 域|イキ||くぎられた ところ|地域|ちいき|earth
 宇|ウ||そら、いえ|宇宙|うちゅう|sky
@@ -919,7 +919,7 @@ const GRADE6_RAW = `
 策|サク||はかりごと|政策|せいさく|spirit
 冊|サツ||ほんを かぞえる|一冊|いっさつ|craft
 蚕||かいこ|きぬいとを つくる むし|養蚕|ようさん|beast
-至|シ|いたる|とどく こと|至急|しきゅう|spirit
+至|シ|いたる|たどりつく、きわみ|至急|しきゅう|spirit
 私|シ|わたし|じぶん|私立|しりつ|life
 姿|シ|すがた|すがた|姿勢|しせい|life
 視|シ||みる こと|視力|しりょく|life
@@ -1218,6 +1218,7 @@ const OKURI_FORCE = new Map([
   ["いさましい", "ましい"],
   ["まつり", "り"],
   ["なくなる", "くなる"],
+  ["ことなる", "なる"],
   ["もっぱら", "ら"],
   ["みずから", "ら"],
   ["おなじ", "じ"],
@@ -2195,7 +2196,7 @@ function makeBossQuestion(g) {
     correct = entry.meaning;
     distractorPool = chars.filter((c) => c !== char).map((c) => KANJI_DB[c].meaning);
   }
-  const distractors = shuffle([...new Set(distractorPool)]).slice(0, 3);
+  const distractors = shuffle([...new Set(distractorPool)].filter((d) => d !== correct)).slice(0, 3);
   const choices = shuffle([correct, ...distractors]);
   return { char, entry, mode, choices, correctIdx: choices.indexOf(correct) };
 }
@@ -3187,7 +3188,7 @@ function AppInner() {
         correct = entry.meaning;
         distractorPool = chars.filter((c) => c !== char).map((c) => KANJI_DB[c].meaning);
       }
-      const distractors = shuffle([...new Set(distractorPool)]).slice(0, 3);
+      const distractors = shuffle([...new Set(distractorPool)].filter((d) => d !== correct)).slice(0, 3);
       const choices = shuffle([correct, ...distractors]);
       return { char, entry, mode, choices, correctIdx: choices.indexOf(correct) };
     },

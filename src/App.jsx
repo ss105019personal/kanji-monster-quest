@@ -1262,6 +1262,10 @@ const OKURI_FORCE_1CHAR = new Map([
 const OKURI_CHAR_OVERRIDES = new Map([
   ["松:まつ", ""], // 松＝まつ（めいし、おくりがな なし）
   ["待:まつ", "つ"], // 待つ＝ま＋つ（どうし）
+  ["帰:かえる", "る"], // 帰る＝かえ＋る（ごだん）
+  ["返:かえる", "る"], // 返る＝かえ＋る（ごだん）
+  ["寄:よる", "る"], // 寄る＝よ＋る（ごだん、「夜」は めいしの ため ぶんかつ なし）
+  ["干:ひる", "る"], // 干る＝ひ＋る（どうし、「昼」は めいしの ため ぶんかつ なし）
 ]);
 function splitOkurigana(reading, char) {
   if (!reading || isKatakanaOnly(reading) || reading.length < 2) return { stem: reading || "", okuri: "" };
@@ -2206,17 +2210,30 @@ function makeBossQuestion(g) {
   if (mode === "write") {
     return { char, entry, mode };
   }
-  let correct, distractorPool;
+  let correct, choices, choiceChars, correctIdx;
   if (mode === "reading") {
     correct = entry.kun.length ? entry.kun[0] : entry.on[0];
-    distractorPool = chars.filter((c) => c !== char).flatMap((c) => [...KANJI_DB[c].kun, ...KANJI_DB[c].on]);
+    const pool = chars
+      .filter((c) => c !== char)
+      .flatMap((c) => [...KANJI_DB[c].kun.map((k) => ({ text: k, srcChar: c })), ...KANJI_DB[c].on.map((k) => ({ text: k, srcChar: c }))]);
+    const seen = new Map();
+    pool.forEach((d) => {
+      if (!seen.has(d.text)) seen.set(d.text, d.srcChar);
+    });
+    const uniqueDistractors = [...seen.entries()].map(([text, srcChar]) => ({ text, srcChar })).filter((d) => d.text !== correct);
+    const distractorObjs = shuffle(uniqueDistractors).slice(0, 3);
+    const choiceObjs = shuffle([{ text: correct, srcChar: char }, ...distractorObjs]);
+    choices = choiceObjs.map((o) => o.text);
+    choiceChars = choiceObjs.map((o) => o.srcChar);
+    correctIdx = choiceObjs.findIndex((o) => o.srcChar === char && o.text === correct);
   } else {
     correct = entry.meaning;
-    distractorPool = chars.filter((c) => c !== char).map((c) => KANJI_DB[c].meaning);
+    const distractorPool = chars.filter((c) => c !== char).map((c) => KANJI_DB[c].meaning);
+    const distractors = shuffle([...new Set(distractorPool)].filter((d) => d !== correct)).slice(0, 3);
+    choices = shuffle([correct, ...distractors]);
+    correctIdx = choices.indexOf(correct);
   }
-  const distractors = shuffle([...new Set(distractorPool)].filter((d) => d !== correct)).slice(0, 3);
-  const choices = shuffle([correct, ...distractors]);
-  return { char, entry, mode, choices, correctIdx: choices.indexOf(correct) };
+  return { char, entry, mode, choices, choiceChars, correctIdx };
 }
 
 function MonsterCreature({ char, clearedCount = 0, level = 1, size = 140, pop = false }) {
@@ -3198,17 +3215,30 @@ function AppInner() {
         return { char, entry, mode };
       }
 
-      let correct, distractorPool;
+      let correct, choices, choiceChars, correctIdx;
       if (mode === "reading") {
         correct = entry.kun.length ? entry.kun[0] : entry.on[0];
-        distractorPool = chars.filter((c) => c !== char).flatMap((c) => [...KANJI_DB[c].kun, ...KANJI_DB[c].on]);
+        const pool = chars
+          .filter((c) => c !== char)
+          .flatMap((c) => [...KANJI_DB[c].kun.map((k) => ({ text: k, srcChar: c })), ...KANJI_DB[c].on.map((k) => ({ text: k, srcChar: c }))]);
+        const seen = new Map();
+        pool.forEach((d) => {
+          if (!seen.has(d.text)) seen.set(d.text, d.srcChar);
+        });
+        const uniqueDistractors = [...seen.entries()].map(([text, srcChar]) => ({ text, srcChar })).filter((d) => d.text !== correct);
+        const distractorObjs = shuffle(uniqueDistractors).slice(0, 3);
+        const choiceObjs = shuffle([{ text: correct, srcChar: char }, ...distractorObjs]);
+        choices = choiceObjs.map((o) => o.text);
+        choiceChars = choiceObjs.map((o) => o.srcChar);
+        correctIdx = choiceObjs.findIndex((o) => o.srcChar === char && o.text === correct);
       } else {
         correct = entry.meaning;
-        distractorPool = chars.filter((c) => c !== char).map((c) => KANJI_DB[c].meaning);
+        const distractorPool = chars.filter((c) => c !== char).map((c) => KANJI_DB[c].meaning);
+        const distractors = shuffle([...new Set(distractorPool)].filter((d) => d !== correct)).slice(0, 3);
+        choices = shuffle([correct, ...distractors]);
+        correctIdx = choices.indexOf(correct);
       }
-      const distractors = shuffle([...new Set(distractorPool)].filter((d) => d !== correct)).slice(0, 3);
-      const choices = shuffle([correct, ...distractors]);
-      return { char, entry, mode, choices, correctIdx: choices.indexOf(correct) };
+      return { char, entry, mode, choices, choiceChars, correctIdx };
     },
     [progress]
   );
@@ -3802,7 +3832,7 @@ function AppInner() {
                           style={{ ...styles.choiceBtn, ...(boss.wrongIdx === i ? styles.choiceBtnWrong : {}) }}
                         >
                           {boss.question.mode === "reading" ? (
-                            <ReadingChoiceText text={c} char={i === boss.question.correctIdx ? boss.question.char : undefined} />
+                            <ReadingChoiceText text={c} char={boss.question.choiceChars ? boss.question.choiceChars[i] : boss.question.char} />
                           ) : (
                             c
                           )}
@@ -3917,7 +3947,7 @@ function AppInner() {
                     style={{ ...styles.choiceBtn, ...(wrongIdx === i ? styles.choiceBtnWrong : {}) }}
                   >
                     {qMode === "reading" ? (
-                      <ReadingChoiceText text={c} char={i === question.correctIdx ? question.char : undefined} />
+                      <ReadingChoiceText text={c} char={question.choiceChars ? question.choiceChars[i] : question.char} />
                     ) : (
                       c
                     )}

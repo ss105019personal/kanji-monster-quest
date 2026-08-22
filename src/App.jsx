@@ -2201,7 +2201,11 @@ function makeBossQuestion(g) {
   const chars = g.chars;
   const char = chars[Math.floor(Math.random() * chars.length)];
   const entry = KANJI_DB[char];
-  const mode = Math.random() < 0.5 ? "reading" : "meaning";
+  const roll = Math.random();
+  const mode = roll < 1 / 3 ? "reading" : roll < 2 / 3 ? "meaning" : "write";
+  if (mode === "write") {
+    return { char, entry, mode };
+  }
   let correct, distractorPool;
   if (mode === "reading") {
     correct = entry.kun.length ? entry.kun[0] : entry.on[0];
@@ -3341,7 +3345,7 @@ function AppInner() {
     setTimeout(() => {
       setBossCutIn(null);
       const q = makeBossQuestion(grade);
-      setBoss({ gradeId, progress: 0, question: q, locked: false, wrongIdx: null, result: null });
+      setBoss({ gradeId, progress: 0, question: q, locked: false, wrongIdx: null, result: null, answerRevealed: false, writeKey: 0 });
     }, 1300);
   }, [grade, gradeId]);
 
@@ -3349,35 +3353,60 @@ function AppInner() {
     setBoss(null);
   }, []);
 
+  const handleBossCorrect = useCallback(() => {
+    if (!boss || boss.locked) return;
+    const newProgress = boss.progress + 1;
+    if (newProgress >= BOSS_ROUNDS) {
+      const nextBD = { ...bossDefeated, [boss.gradeId]: true };
+      setBossDefeated(nextBD);
+      const newGold = gold + BOSS_WIN_GOLD;
+      setGold(newGold);
+      persistAll({ bossDefeated: nextBD, gold: newGold });
+      setBoss({ ...boss, progress: newProgress, locked: true, result: "win" });
+      return;
+    }
+    setBoss({ ...boss, progress: newProgress, locked: true, wrongIdx: null, result: "hit" });
+    setTimeout(() => {
+      setBoss((prev) => {
+        if (!prev || prev.result !== "hit") return prev;
+        const q = makeBossQuestion(grade);
+        return { ...prev, question: q, locked: false, wrongIdx: null, result: null, answerRevealed: false, writeKey: (prev.writeKey || 0) + 1 };
+      });
+    }, 700);
+  }, [boss, bossDefeated, gold, persistAll, grade]);
+
+  const handleBossWrong = useCallback(
+    (wrongIdx) => {
+      if (!boss || boss.locked) return;
+      setBoss({ ...boss, wrongIdx: wrongIdx ?? null, locked: true, result: "lose" });
+    },
+    [boss]
+  );
+
   const onBossAnswer = useCallback(
     (i) => {
       if (!boss || boss.locked) return;
       const correct = i === boss.question.correctIdx;
-      if (correct) {
-        const newProgress = boss.progress + 1;
-        if (newProgress >= BOSS_ROUNDS) {
-          const nextBD = { ...bossDefeated, [boss.gradeId]: true };
-          setBossDefeated(nextBD);
-          const newGold = gold + BOSS_WIN_GOLD;
-          setGold(newGold);
-          persistAll({ bossDefeated: nextBD, gold: newGold });
-          setBoss({ ...boss, progress: newProgress, locked: true, result: "win" });
-          return;
-        }
-        setBoss({ ...boss, progress: newProgress, locked: true, wrongIdx: null, result: "hit" });
-        setTimeout(() => {
-          setBoss((prev) => {
-            if (!prev || prev.result !== "hit") return prev;
-            const q = makeBossQuestion(grade);
-            return { ...prev, question: q, locked: false, wrongIdx: null, result: null };
-          });
-        }, 700);
-      } else {
-        setBoss({ ...boss, wrongIdx: i, locked: true, result: "lose" });
-      }
+      if (correct) handleBossCorrect();
+      else handleBossWrong(i);
     },
-    [boss, bossDefeated, gold, persistAll, grade]
+    [boss, handleBossCorrect, handleBossWrong]
   );
+
+  const onBossWriteDone = useCallback(() => {
+    if (!boss || boss.locked || boss.question.mode !== "write") return;
+    handleBossCorrect();
+  }, [boss, handleBossCorrect]);
+
+  const onBossWriteMissed = useCallback(() => {
+    if (!boss || boss.locked || boss.question.mode !== "write") return;
+    handleBossWrong(null);
+  }, [boss, handleBossWrong]);
+
+  const onBossRevealAnswer = useCallback(() => {
+    if (!boss) return;
+    setBoss({ ...boss, answerRevealed: true });
+  }, [boss]);
 
   const buyOrEquip = useCallback(
     (char, slot, item) => {
@@ -3726,6 +3755,39 @@ function AppInner() {
                   <div style={styles.bannerWrap}>
                     <div style={styles.bannerReview}>やった！ こうげき せいこう！</div>
                   </div>
+                ) : boss.question.mode === "write" ? (
+                  <>
+                    <div style={styles.questionSubtext}>つぎの ことばの □に はいる かんじを かいてみよう</div>
+                    <div style={styles.blankWordRow}>
+                      {blankedExample(boss.question.entry, boss.question.char).before}
+                      <span style={styles.blankBox}>□</span>
+                      {blankedExample(boss.question.entry, boss.question.char).after}
+                    </div>
+                    <div style={styles.writeReadingText}>よみかた：{boss.question.entry.exampleReading}</div>
+                    <div style={styles.writeMeaningText}>いみ：{boss.question.entry.meaning}</div>
+                    <WritingPad key={boss.writeKey} char={boss.question.char} size={180} showAnswer={boss.answerRevealed} />
+                    <div style={styles.bannerWrap}>
+                      {!boss.answerRevealed ? (
+                        <button style={styles.nextBtn} onClick={onBossRevealAnswer}>
+                          🔍 せいかいを みる
+                        </button>
+                      ) : (
+                        <>
+                          <div style={styles.answerRevealNote}>
+                            せいかいは「{boss.question.char}」。じぶんの じで あってたかな？
+                          </div>
+                          <div style={{ display: "flex", gap: 10 }}>
+                            <button style={styles.judgeBtnGood} onClick={onBossWriteDone}>
+                              ⭕ できた！
+                            </button>
+                            <button style={styles.judgeBtnBad} onClick={onBossWriteMissed}>
+                              ❌ できなかった
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </>
                 ) : (
                   <>
                     <div style={styles.questionKanjiBig}>{boss.question.char}</div>

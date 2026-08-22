@@ -1225,8 +1225,17 @@ const OKURI_FORCE_1CHAR = new Map([
   ["ゆたか", "か"],
   ["おごそか", "か"],
 ]);
-function splitOkurigana(reading) {
+// 「まつ」のように おなじ よみでも かんじによって おくりがなが ちがう もの（さいゆうせん で かくにん）
+const OKURI_CHAR_OVERRIDES = new Map([
+  ["松:まつ", ""], // 松＝まつ（めいし、おくりがな なし）
+  ["待:まつ", "つ"], // 待つ＝ま＋つ（どうし）
+]);
+function splitOkurigana(reading, char) {
   if (!reading || isKatakanaOnly(reading) || reading.length < 2) return { stem: reading || "", okuri: "" };
+  if (char && OKURI_CHAR_OVERRIDES.has(`${char}:${reading}`)) {
+    const okuri = OKURI_CHAR_OVERRIDES.get(`${char}:${reading}`);
+    return okuri ? { stem: reading.slice(0, -okuri.length), okuri } : { stem: reading, okuri: "" };
+  }
   if (OKURI_NO_SPLIT_EXCEPTIONS.has(reading)) return { stem: reading, okuri: "" };
   if (OKURI_FORCE.has(reading)) {
     const okuri = OKURI_FORCE.get(reading);
@@ -1249,8 +1258,8 @@ function splitOkurigana(reading) {
   }
   return { stem: reading, okuri: "" };
 }
-function ReadingChoiceText({ text }) {
-  const { stem, okuri } = splitOkurigana(text);
+function ReadingChoiceText({ text, char }) {
+  const { stem, okuri } = splitOkurigana(text, char);
   if (!okuri) return <>{text}</>;
   return (
     <>
@@ -3693,7 +3702,11 @@ function AppInner() {
                           onClick={() => onBossAnswer(i)}
                           style={{ ...styles.choiceBtn, ...(boss.wrongIdx === i ? styles.choiceBtnWrong : {}) }}
                         >
-                          {boss.question.mode === "reading" ? <ReadingChoiceText text={c} /> : c}
+                          {boss.question.mode === "reading" ? (
+                            <ReadingChoiceText text={c} char={i === boss.question.correctIdx ? boss.question.char : undefined} />
+                          ) : (
+                            c
+                          )}
                         </button>
                       ))}
                     </div>
@@ -3804,7 +3817,11 @@ function AppInner() {
                     onClick={() => onAnswer(i)}
                     style={{ ...styles.choiceBtn, ...(wrongIdx === i ? styles.choiceBtnWrong : {}) }}
                   >
-                    {qMode === "reading" ? <ReadingChoiceText text={c} /> : c}
+                    {qMode === "reading" ? (
+                      <ReadingChoiceText text={c} char={i === question.correctIdx ? question.char : undefined} />
+                    ) : (
+                      c
+                    )}
                   </button>
                 ))}
               </div>

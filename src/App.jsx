@@ -1180,6 +1180,47 @@ function shuffle(arr) {
   return a;
 }
 
+/* --- おくりがなの じどう すいてい（かんぺきでは ないので、へんな ばしょが あれば おしえてください） --- */
+function isKatakanaOnly(s) {
+  return /^[\u30A0-\u30FF\u30FCー・]+$/.test(s || "");
+}
+const OKURI_2CHAR_ENDINGS = [
+  "える", "ける", "げる", "せる", "ぜる", "てる", "でる", "ねる", "へる", "べる", "める", "れる",
+  "いる", "きる", "ぎる", "しる", "ちる", "にる", "ひる", "みる", "りる",
+];
+const OKURI_1CHAR_ENDINGS = ["る", "く", "ぐ", "す", "つ", "ぬ", "ぶ", "む", "う", "い"];
+// じどう すいてい だと まちがえやすい めいし（送りがなが ない ことば）
+const OKURI_NO_SPLIT_EXCEPTIONS = new Set([
+  "かい", "いぬ", "ゆう", "なつ", "ひる", "よる", "まる", "はる", "あい", "ふく",
+  "さい", "はつ", "まつ", "はい", "かぶ", "きぬ", "せい",
+]);
+function splitOkurigana(reading) {
+  if (!reading || isKatakanaOnly(reading) || reading.length < 2) return { stem: reading || "", okuri: "" };
+  if (OKURI_NO_SPLIT_EXCEPTIONS.has(reading)) return { stem: reading, okuri: "" };
+  if (reading.endsWith("しい")) return { stem: reading.slice(0, -2), okuri: "しい" };
+  if (reading.endsWith("きい")) return { stem: reading.slice(0, -2), okuri: "きい" };
+  for (const end of OKURI_2CHAR_ENDINGS) {
+    if (reading.length > 2 && reading.endsWith(end)) {
+      return { stem: reading.slice(0, -2), okuri: end };
+    }
+  }
+  const last = reading[reading.length - 1];
+  if (OKURI_1CHAR_ENDINGS.includes(last)) {
+    return { stem: reading.slice(0, -1), okuri: last };
+  }
+  return { stem: reading, okuri: "" };
+}
+function ReadingChoiceText({ text }) {
+  const { stem, okuri } = splitOkurigana(text);
+  if (!okuri) return <>{text}</>;
+  return (
+    <>
+      {stem}
+      <span style={{ color: "#ffd37a" }}>{okuri}</span>
+    </>
+  );
+}
+
 function blankedExample(entry, char) {
   const idx = entry.example.indexOf(char);
   if (idx === -1) {
@@ -3613,7 +3654,7 @@ function AppInner() {
                           onClick={() => onBossAnswer(i)}
                           style={{ ...styles.choiceBtn, ...(boss.wrongIdx === i ? styles.choiceBtnWrong : {}) }}
                         >
-                          {c}
+                          {boss.question.mode === "reading" ? <ReadingChoiceText text={c} /> : c}
                         </button>
                       ))}
                     </div>
@@ -3687,6 +3728,7 @@ function AppInner() {
                 {blankedExample(question.entry, question.char).after}
               </div>
               <div style={styles.writeReadingText}>よみかた：{question.entry.exampleReading}</div>
+              <div style={styles.writeMeaningText}>「{question.char}」の いみ：{question.entry.meaning}</div>
               <WritingPad key={writeKey} char={question.char} size={200} showAnswer={answerRevealed} />
               <div style={styles.bannerWrap}>
                 {!answerRevealed ? (
@@ -3723,7 +3765,7 @@ function AppInner() {
                     onClick={() => onAnswer(i)}
                     style={{ ...styles.choiceBtn, ...(wrongIdx === i ? styles.choiceBtnWrong : {}) }}
                   >
-                    {c}
+                    {qMode === "reading" ? <ReadingChoiceText text={c} /> : c}
                   </button>
                 ))}
               </div>
@@ -4473,6 +4515,13 @@ const styles = {
     color: "#f1eefc",
     textAlign: "center",
     marginBottom: 6,
+  },
+  writeMeaningText: {
+    fontSize: 12,
+    color: "#b8b0ec",
+    textAlign: "center",
+    marginTop: -2,
+    marginBottom: 8,
   },
   choiceGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, width: "100%", maxWidth: 420 },
   choiceBtn: { background: "#25235093", border: "1px solid #4b477f", borderRadius: 14, padding: "14px 10px", color: "#f4f2ff", fontSize: 14, fontWeight: 700, cursor: "pointer" },

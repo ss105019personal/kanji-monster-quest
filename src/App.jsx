@@ -872,7 +872,7 @@ const GRADE6_RAW = `
 閣|カク||たてもの|内閣|ないかく|craft
 割|カツ|わる,わり|わける こと|割合|わりあい|spirit
 株||かぶ|きの ね、かぶしき|株式|かぶしき|wood
-干|カン|ほす,ひる|かわかす こと|干潮|かんちょう|water
+干|カン|ほす|かわかす こと|干潮|かんちょう|water
 巻|カン|まく|まく こと|巻物|まきもの|craft
 看|カン||みる こと|看護|かんご|spirit
 簡|カン||かんたん|簡単|かんたん|spirit
@@ -1265,7 +1265,6 @@ const OKURI_CHAR_OVERRIDES = new Map([
   ["帰:かえる", "る"], // 帰る＝かえ＋る（ごだん）
   ["返:かえる", "る"], // 返る＝かえ＋る（ごだん）
   ["寄:よる", "る"], // 寄る＝よ＋る（ごだん、「夜」は めいしの ため ぶんかつ なし）
-  ["干:ひる", "る"], // 干る＝ひ＋る（どうし、「昼」は めいしの ため ぶんかつ なし）
 ]);
 function splitOkurigana(reading, char) {
   if (!reading || isKatakanaOnly(reading) || reading.length < 2) return { stem: reading || "", okuri: "" };

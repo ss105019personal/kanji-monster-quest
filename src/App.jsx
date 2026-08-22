@@ -1186,12 +1186,14 @@ function isKatakanaOnly(s) {
 }
 const OKURI_2CHAR_ENDINGS = [
   "える", "ける", "げる", "せる", "ぜる", "てる", "でる", "ねる", "へる", "べる", "める", "れる",
+  "やか", "らか",
 ];
 const OKURI_1CHAR_ENDINGS = ["る", "く", "ぐ", "す", "つ", "ぬ", "ぶ", "む", "う", "い"];
 // じどう すいてい だと まちがえやすい めいし（送りがなが ない ことば）
 const OKURI_NO_SPLIT_EXCEPTIONS = new Set([
   "かい", "いぬ", "ゆう", "なつ", "ひる", "よる", "まる", "はる", "あい", "ふく",
   "さい", "はつ", "まつ", "はい", "かぶ", "きぬ", "せい",
+  "あか", "なか", "ほか", "さか", "おか", "しか", "はか",
 ]);
 // ペアになる どうしと おくりがなを そろえる ため、2文字に する もの（例：のびる／のばす）
 // また、い・き・し・ち・に・ひ・み・り・び行＋る は ことばごとに ちがう ため、いっかつルールに せず ここで こべつに してい
@@ -1199,11 +1201,22 @@ const OKURI_FORCE_2CHAR = new Map([
   ["のばす", "ばす"],
   ["のびる", "びる"],
 ]);
+// 「しずか」「たしか」のような「〜か」の な形容詞は めいしと まぎらわしい ため こべつに してい
+const OKURI_FORCE_1CHAR = new Map([
+  ["しずか", "か"],
+  ["たしか", "か"],
+  ["ゆたか", "か"],
+  ["おごそか", "か"],
+]);
 function splitOkurigana(reading) {
   if (!reading || isKatakanaOnly(reading) || reading.length < 2) return { stem: reading || "", okuri: "" };
   if (OKURI_NO_SPLIT_EXCEPTIONS.has(reading)) return { stem: reading, okuri: "" };
   if (OKURI_FORCE_2CHAR.has(reading)) {
     const okuri = OKURI_FORCE_2CHAR.get(reading);
+    return { stem: reading.slice(0, -okuri.length), okuri };
+  }
+  if (OKURI_FORCE_1CHAR.has(reading)) {
+    const okuri = OKURI_FORCE_1CHAR.get(reading);
     return { stem: reading.slice(0, -okuri.length), okuri };
   }
   if (reading.endsWith("しい")) return { stem: reading.slice(0, -2), okuri: "しい" };
@@ -1225,7 +1238,7 @@ function ReadingChoiceText({ text }) {
   return (
     <>
       {stem}
-      <span style={{ color: "#ffd37a" }}>{okuri}</span>
+      <span style={{ color: "#ffd37a" }}>({okuri})</span>
     </>
   );
 }

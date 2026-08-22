@@ -1186,7 +1186,6 @@ function isKatakanaOnly(s) {
 }
 const OKURI_2CHAR_ENDINGS = [
   "える", "ける", "げる", "せる", "ぜる", "てる", "でる", "ねる", "へる", "べる", "める", "れる",
-  "いる", "きる", "ぎる", "しる", "ちる", "にる", "ひる", "みる", "りる", "びる", "ぴる",
 ];
 const OKURI_1CHAR_ENDINGS = ["る", "く", "ぐ", "す", "つ", "ぬ", "ぶ", "む", "う", "い"];
 // じどう すいてい だと まちがえやすい めいし（送りがなが ない ことば）
@@ -1195,7 +1194,11 @@ const OKURI_NO_SPLIT_EXCEPTIONS = new Set([
   "さい", "はつ", "まつ", "はい", "かぶ", "きぬ", "せい",
 ]);
 // ペアになる どうしと おくりがなを そろえる ため、2文字に する もの（例：のびる／のばす）
-const OKURI_FORCE_2CHAR = new Map([["のばす", "ばす"]]);
+// また、い・き・し・ち・に・ひ・み・り・び行＋る は ことばごとに ちがう ため、いっかつルールに せず ここで こべつに してい
+const OKURI_FORCE_2CHAR = new Map([
+  ["のばす", "ばす"],
+  ["のびる", "びる"],
+]);
 function splitOkurigana(reading) {
   if (!reading || isKatakanaOnly(reading) || reading.length < 2) return { stem: reading || "", okuri: "" };
   if (OKURI_NO_SPLIT_EXCEPTIONS.has(reading)) return { stem: reading, okuri: "" };
@@ -3734,7 +3737,7 @@ function AppInner() {
                 {blankedExample(question.entry, question.char).after}
               </div>
               <div style={styles.writeReadingText}>よみかた：{question.entry.exampleReading}</div>
-              <div style={styles.writeMeaningText}>「{question.char}」の いみ：{question.entry.meaning}</div>
+              <div style={styles.writeMeaningText}>いみ：{question.entry.meaning}</div>
               <WritingPad key={writeKey} char={question.char} size={200} showAnswer={answerRevealed} />
               <div style={styles.bannerWrap}>
                 {!answerRevealed ? (

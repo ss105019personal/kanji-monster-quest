@@ -1351,7 +1351,7 @@ function KanjiText({ x, y, char, revealChar, awake, size = 28 }) {
       stroke={OUTLINE}
       strokeWidth="1.5"
       paintOrder="stroke"
-      style={{ fontFamily: "'Zen Maru Gothic', sans-serif" }}
+      style={{ fontFamily: "'Klee One', 'Zen Maru Gothic', sans-serif" }}
     >
       {revealChar ? char : "？"}
     </text>
@@ -2840,7 +2840,7 @@ function WritingPad({ char, size = 200, showAnswer = false }) {
               justifyContent: "center",
               fontSize: size * 0.58,
               color: "#c0392b33",
-              fontFamily: "'Zen Maru Gothic', sans-serif",
+              fontFamily: "'Klee One', 'Zen Maru Gothic', sans-serif",
               fontWeight: 900,
               pointerEvents: "none",
             }}
@@ -4097,7 +4097,7 @@ function AppInner() {
 function GlobalStyle() {
   return (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@400;500;700;900&family=Klee+One:wght@400;600&display=swap');
       @keyframes popIn {
         0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
         60% { transform: scale(1.15) rotate(4deg); opacity: 1; }
@@ -4433,7 +4433,7 @@ const styles = {
   certStatus: { fontSize: 10, opacity: 0.7, marginTop: 2 },
   questionText: { fontFamily: "'Yusei Magic', sans-serif", fontSize: 15, textAlign: "center", margin: "6px 0 4px", lineHeight: 1.6 },
   questionKanjiBig: {
-    fontFamily: "'Zen Maru Gothic', sans-serif",
+    fontFamily: "'Klee One', 'Zen Maru Gothic', sans-serif",
     fontWeight: 900,
     fontSize: 88,
     lineHeight: 1,
@@ -4448,7 +4448,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
-    fontFamily: "'Zen Maru Gothic', sans-serif",
+    fontFamily: "'Klee One', 'Zen Maru Gothic', sans-serif",
     fontWeight: 900,
     fontSize: 52,
     color: "#fff",
@@ -4628,7 +4628,7 @@ const styles = {
     borderRadius: 999,
     marginBottom: 4,
   },
-  zukanCardLabel: { fontSize: 14, fontWeight: 800, marginTop: 2 },
+  zukanCardLabel: { fontSize: 14, fontWeight: 800, marginTop: 2, fontFamily: "'Klee One', 'Zen Maru Gothic', sans-serif" },
   zukanCardReading: { fontSize: 9, opacity: 0.75, textAlign: "center", lineHeight: 1.3, padding: "0 2px", minHeight: 12 },
   miniChecklistRow: { display: "flex", gap: 3, marginTop: 2 },
   miniChecklistDot: {
@@ -4653,7 +4653,7 @@ const styles = {
   modalCard: { background: "linear-gradient(170deg,#2a2758,#1b1a3a)", border: "1px solid #4b477f", borderRadius: 22, padding: "26px 24px 22px", maxWidth: 320, width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, position: "relative" },
   modalClose: { position: "absolute", top: 10, right: 14, background: "none", border: "none", color: "#cfcaf0", fontSize: 22, cursor: "pointer" },
   modalType: { fontSize: 11, opacity: 0.7, marginTop: 4 },
-  modalKanji: { fontFamily: "'Yusei Magic', sans-serif", fontSize: 24, margin: "2px 0 6px" },
+  modalKanji: { fontFamily: "'Klee One', 'Zen Maru Gothic', sans-serif", fontSize: 24, margin: "2px 0 6px" },
   expBarBg: { width: "100%", height: 8, borderRadius: 999, background: "#2c2a54", overflow: "hidden", border: "1px solid #423f78", marginBottom: 6 },
   expBarFill: { height: "100%", background: "linear-gradient(90deg,#c98cff,#8a78ff)", borderRadius: 999, transition: "width 0.3s ease" },
   modalRow: { width: "100%", display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13, borderTop: "1px solid #383564", padding: "8px 2px" },

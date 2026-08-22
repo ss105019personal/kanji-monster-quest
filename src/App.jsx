@@ -1268,6 +1268,10 @@ function ReadingChoiceText({ text, char }) {
     </>
   );
 }
+function formatKunReading(reading, char) {
+  const { stem, okuri } = splitOkurigana(reading, char);
+  return okuri ? `${stem}(${okuri})` : reading;
+}
 
 function blankedExample(entry, char) {
   const idx = entry.example.indexOf(char);
@@ -3934,7 +3938,7 @@ function AppInner() {
                     const revealed = n > 0;
                     const inParty = party.includes(c);
                     const entry = KANJI_DB[c];
-                    const readingsText = [...entry.on, ...entry.kun].join("・");
+                    const readingsText = [...entry.on, ...entry.kun.map((k) => formatKunReading(k, c))].join("・");
                     const tierColor = tierBorderColor(n);
                     return (
                       <button
@@ -4169,7 +4173,9 @@ function AppInner() {
             <div style={styles.modalKanji}>{detail}</div>
             <div style={styles.modalRow}>
               <span style={styles.modalLabel}>よみかた</span>
-              <span>{[...KANJI_DB[detail].on, ...KANJI_DB[detail].kun].join("　") || "－"}</span>
+              <span>
+                {[...KANJI_DB[detail].on, ...KANJI_DB[detail].kun.map((k) => formatKunReading(k, detail))].join("　") || "－"}
+              </span>
             </div>
             <div style={styles.modalRow}>
               <span style={styles.modalLabel}>いみ</span>

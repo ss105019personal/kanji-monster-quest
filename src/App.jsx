@@ -492,7 +492,7 @@ const GRADE4_RAW = `
 季|キ||きせつ|四季|しき|sky
 旗|キ|はた|めじるしの ぬの|国旗|こっき|craft
 器|キ|うつわ|いれもの、どうぐ|楽器|がっき|craft
-機|キ||きかい、チャンス|飛行機|ひこうき|craft
+機|キ|はた|きかい、チャンス|飛行機|ひこうき|craft
 議|ギ||はなしあう こと|会議|かいぎ|spirit
 求|キュウ|もとめる|もとめる こと|要求|ようきゅう|spirit
 泣|キュウ|なく|なみだを ながす|号泣|ごうきゅう|life
@@ -2200,6 +2200,15 @@ function BossCreature({ boss, size = 180 }) {
   );
 }
 
+// とくていの かんじだけ、くんよみが あっても おんよみを ゆうせんする（クイズの せいかい ようの せってい）
+const READING_PRIORITY_OVERRIDE = new Map([["機", "on"]]);
+function primaryReading(char, entry) {
+  const pref = READING_PRIORITY_OVERRIDE.get(char);
+  if (pref === "on" && entry.on.length) return entry.on[0];
+  if (pref === "kun" && entry.kun.length) return entry.kun[0];
+  return entry.kun.length ? entry.kun[0] : entry.on[0];
+}
+
 function makeBossQuestion(g) {
   const chars = g.chars;
   const char = chars[Math.floor(Math.random() * chars.length)];
@@ -2211,7 +2220,7 @@ function makeBossQuestion(g) {
   }
   let correct, choices, choiceChars, correctIdx;
   if (mode === "reading") {
-    correct = entry.kun.length ? entry.kun[0] : entry.on[0];
+    correct = primaryReading(char, entry);
     const pool = chars
       .filter((c) => c !== char)
       .flatMap((c) => [...KANJI_DB[c].kun.map((k) => ({ text: k, srcChar: c })), ...KANJI_DB[c].on.map((k) => ({ text: k, srcChar: c }))]);
@@ -3216,7 +3225,7 @@ function AppInner() {
 
       let correct, choices, choiceChars, correctIdx;
       if (mode === "reading") {
-        correct = entry.kun.length ? entry.kun[0] : entry.on[0];
+        correct = primaryReading(char, entry);
         const pool = chars
           .filter((c) => c !== char)
           .flatMap((c) => [...KANJI_DB[c].kun.map((k) => ({ text: k, srcChar: c })), ...KANJI_DB[c].on.map((k) => ({ text: k, srcChar: c }))]);

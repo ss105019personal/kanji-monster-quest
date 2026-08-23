@@ -1265,6 +1265,7 @@ const OKURI_CHAR_OVERRIDES = new Map([
   ["帰:かえる", "る"], // 帰る＝かえ＋る（ごだん）
   ["返:かえる", "る"], // 返る＝かえ＋る（ごだん）
   ["寄:よる", "る"], // 寄る＝よ＋る（ごだん、「夜」は めいしの ため ぶんかつ なし）
+  ["位:くらい", ""], // 位＝くらい（めいし、おくりがな なし。「暗い」は けいようし）
 ]);
 function splitOkurigana(reading, char) {
   if (!reading || isKatakanaOnly(reading) || reading.length < 2) return { stem: reading || "", okuri: "" };

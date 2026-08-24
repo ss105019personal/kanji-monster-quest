@@ -2922,6 +2922,85 @@ function HeroAvatar({ equipped, size = 150, level = 1 }) {
 /* 書き取りパッド（iPad 対応：ポインターイベント）                       */
 /* ================================================================== */
 
+const STROKE_COLORS = [
+  "#e8483a", "#ff8a5c", "#ffd24d", "#8fcb4e", "#57C7F5", "#a76aff", "#ff6fb0",
+  "#5be3ff", "#ffb703", "#3fae5c", "#e0392b", "#5a2f8f", "#2f8f52", "#c9a24d", "#7fe3ff",
+];
+function StrokeOrderDiagram({ char, size = 130 }) {
+  const [strokes, setStrokes] = useState(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setStrokes(null);
+    setFailed(false);
+    const codepoint = char.codePointAt(0).toString(16).padStart(5, "0");
+    fetch(`/strokes/${codepoint}.json`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((data) => {
+        if (!cancelled) setStrokes(data);
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [char]);
+
+  if (failed) return null;
+  if (!strokes) return <div style={{ fontSize: 11, opacity: 0.6, textAlign: "center" }}>かきじゅん よみこみ中…</div>;
+
+  return (
+    <div style={{ textAlign: "center" }}>
+      <svg
+        viewBox="0 0 109 109"
+        width={size}
+        height={size}
+        style={{ background: "#fdf9ee", borderRadius: 12, border: "1px solid #c9bfa0" }}
+      >
+        {strokes.d.map((d, i) => (
+          <path
+            key={i}
+            d={d}
+            fill="none"
+            stroke={STROKE_COLORS[i % STROKE_COLORS.length]}
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.92"
+          />
+        ))}
+        {strokes.d.map((d, i) => {
+          const m = /^M\s*(-?[\d.]+)[,\s](-?[\d.]+)/.exec(d);
+          const x = m ? parseFloat(m[1]) : 8;
+          const y = m ? parseFloat(m[2]) : 8;
+          return (
+            <text
+              key={`n${i}`}
+              x={x}
+              y={y}
+              fontSize="9.5"
+              fill="#241f33"
+              fontWeight="800"
+              style={{ paintOrder: "stroke", stroke: "#fff", strokeWidth: 2.5 }}
+            >
+              {i + 1}
+            </text>
+          );
+        })}
+      </svg>
+      <div style={{ fontSize: 10, opacity: 0.65, marginTop: 4 }}>
+        ぜんぶで {strokes.n}かく／データ：
+        <a href="https://kanjivg.tagaini.net" target="_blank" rel="noreferrer" style={{ color: "#8aa9d6" }}>
+          KanjiVG
+        </a>{" "}
+        (CC BY-SA)
+      </div>
+    </div>
+  );
+}
+
 function WritingPad({ char, size = 200, showAnswer = false }) {
   const canvasRef = useRef(null);
   const drawingRef = useRef(false);
@@ -3016,6 +3095,12 @@ function WritingPad({ char, size = 200, showAnswer = false }) {
           🧹 けす
         </button>
       </div>
+      {showAnswer && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 4 }}>✍️ かきじゅん</div>
+          <StrokeOrderDiagram char={char} size={Math.min(size, 150)} />
+        </div>
+      )}
     </div>
   );
 }
@@ -4320,6 +4405,9 @@ function AppInner() {
               <span>
                 {KANJI_DB[detail].example}（{KANJI_DB[detail].exampleReading}）
               </span>
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <StrokeOrderDiagram char={detail} size={130} />
             </div>
           </div>
         </div>

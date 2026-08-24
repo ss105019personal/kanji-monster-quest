@@ -2928,15 +2928,18 @@ const STROKE_COLORS = [
 ];
 const STROKE_NUM_OFFSET_CANDIDATES = [
   [0, 0],
-  [6, -2], [-6, -2], [0, -7], [0, 7],
-  [6, 5], [-6, 5], [8, 0], [-8, 0],
-  [5, -6], [-5, -6], [5, 6], [-5, 6],
+  [4.5, -1.5], [-4.5, -1.5], [0, -5], [0, 5],
+  [4.5, 3.5], [-4.5, 3.5], [6, 0], [-6, 0],
+  [3.5, -4.5], [-3.5, -4.5], [3.5, 4.5], [-3.5, 4.5],
+  [0, -7.5], [0, 7.5], [7.5, 0], [-7.5, 0],
+  [6, -6], [-6, -6], [6, 6], [-6, 6],
   [0, -10], [0, 10], [10, 0], [-10, 0],
-  [8, -8], [-8, -8], [8, 8], [-8, 8],
+  [7, -9], [-7, -9], [7, 9], [-7, 9],
+  [9, -7], [-9, -7], [9, 7], [-9, 7],
   [0, -13], [0, 13], [13, 0], [-13, 0],
   [0, -16], [0, 16], [16, 0], [-16, 0],
 ];
-const STROKE_NUM_RADIUS = 5.3;
+const STROKE_NUM_RADIUS = 4.2;
 function StrokeOrderDiagram({ char, size = 130 }) {
   const [strokes, setStrokes] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -2988,8 +2991,8 @@ function StrokeOrderDiagram({ char, size = 130 }) {
       startPoints.push(pts[0] || [8, 8]);
     });
 
-    const minLabelDist = STROKE_NUM_RADIUS * 2 + 1.5;
-    const minStrokeDist = STROKE_NUM_RADIUS + 2.2;
+    const minLabelDist = STROKE_NUM_RADIUS * 2 + 1;
+    const minStrokeDist = STROKE_NUM_RADIUS + 1.6;
     const placedLabels = [];
     const positions = startPoints.map(([x, y]) => {
       let best = null;
@@ -3050,12 +3053,19 @@ function StrokeOrderDiagram({ char, size = 130 }) {
           labelPositions.map(([x, y], i) => {
             const color = STROKE_COLORS[i % STROKE_COLORS.length];
             return (
-              <g key={`n${i}`}>
-                <circle cx={x} cy={y} r={STROKE_NUM_RADIUS} fill={color} stroke="#fff" strokeWidth="1" />
-                <text x={x} y={y} fontSize="7" fill="#fff" fontWeight="800" textAnchor="middle" dominantBaseline="central">
-                  {i + 1}
-                </text>
-              </g>
+              <text
+                key={`n${i}`}
+                x={x}
+                y={y}
+                fontSize="9"
+                fill={color}
+                fontWeight="800"
+                textAnchor="middle"
+                dominantBaseline="central"
+                style={{ paintOrder: "stroke", stroke: "#1c1a24", strokeWidth: 2.4, strokeLinejoin: "round" }}
+              >
+                {i + 1}
+              </text>
             );
           })}
       </svg>

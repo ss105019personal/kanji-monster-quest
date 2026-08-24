@@ -2926,6 +2926,37 @@ const STROKE_COLORS = [
   "#e8483a", "#ff8a5c", "#ffd24d", "#8fcb4e", "#57C7F5", "#a76aff", "#ff6fb0",
   "#5be3ff", "#ffb703", "#3fae5c", "#e0392b", "#5a2f8f", "#2f8f52", "#c9a24d", "#7fe3ff",
 ];
+const STROKE_NUM_OFFSET_CANDIDATES = [
+  [0, 0],
+  [6, -2], [-6, -2], [0, -7], [0, 7],
+  [6, 5], [-6, 5], [8, 0], [-8, 0],
+  [5, -6], [-5, -6], [5, 6], [-5, 6],
+  [0, -10], [0, 10], [10, 0], [-10, 0],
+  [8, -8], [-8, -8], [8, 8], [-8, 8],
+  [0, -13], [0, 13], [13, 0], [-13, 0],
+];
+const STROKE_NUM_MIN_DIST = 7;
+function strokeNumberPositions(paths) {
+  const placed = [];
+  return paths.map((d) => {
+    const m = /^M\s*(-?[\d.]+)[,\s](-?[\d.]+)/.exec(d);
+    const x = m ? parseFloat(m[1]) : 8;
+    const y = m ? parseFloat(m[2]) : 8;
+    let best = null;
+    for (const [dx, dy] of STROKE_NUM_OFFSET_CANDIDATES) {
+      const cx = x + dx;
+      const cy = y + dy;
+      const collides = placed.some(([px, py]) => Math.hypot(px - cx, py - cy) < STROKE_NUM_MIN_DIST);
+      if (!collides) {
+        best = [cx, cy];
+        break;
+      }
+    }
+    if (!best) best = [x, y];
+    placed.push(best);
+    return best;
+  });
+}
 function StrokeOrderDiagram({ char, size = 130 }) {
   const [strokes, setStrokes] = useState(null);
   const [failed, setFailed] = useState(false);
@@ -2951,6 +2982,8 @@ function StrokeOrderDiagram({ char, size = 130 }) {
   if (failed) return null;
   if (!strokes) return <div style={{ fontSize: 11, opacity: 0.6, textAlign: "center" }}>かきじゅん よみこみ中…</div>;
 
+  const numberPositions = strokeNumberPositions(strokes.d);
+
   return (
     <div style={{ textAlign: "center" }}>
       <svg
@@ -2971,24 +3004,19 @@ function StrokeOrderDiagram({ char, size = 130 }) {
             opacity="0.92"
           />
         ))}
-        {strokes.d.map((d, i) => {
-          const m = /^M\s*(-?[\d.]+)[,\s](-?[\d.]+)/.exec(d);
-          const x = m ? parseFloat(m[1]) : 8;
-          const y = m ? parseFloat(m[2]) : 8;
-          return (
-            <text
-              key={`n${i}`}
-              x={x}
-              y={y}
-              fontSize="9.5"
-              fill="#241f33"
-              fontWeight="800"
-              style={{ paintOrder: "stroke", stroke: "#fff", strokeWidth: 2.5 }}
-            >
-              {i + 1}
-            </text>
-          );
-        })}
+        {numberPositions.map(([x, y], i) => (
+          <text
+            key={`n${i}`}
+            x={x}
+            y={y}
+            fontSize="9.5"
+            fill="#241f33"
+            fontWeight="800"
+            style={{ paintOrder: "stroke", stroke: "#fff", strokeWidth: 2.5 }}
+          >
+            {i + 1}
+          </text>
+        ))}
       </svg>
       <div style={{ fontSize: 10, opacity: 0.65, marginTop: 4 }}>
         ぜんぶで {strokes.n}かく／データ：

@@ -2934,37 +2934,21 @@ const STROKE_NUM_OFFSET_CANDIDATES = [
   [0, -10], [0, 10], [10, 0], [-10, 0],
   [8, -8], [-8, -8], [8, 8], [-8, 8],
   [0, -13], [0, 13], [13, 0], [-13, 0],
+  [0, -16], [0, 16], [16, 0], [-16, 0],
 ];
-const STROKE_NUM_MIN_DIST = 7;
-function strokeNumberPositions(paths) {
-  const placed = [];
-  return paths.map((d) => {
-    const m = /^M\s*(-?[\d.]+)[,\s](-?[\d.]+)/.exec(d);
-    const x = m ? parseFloat(m[1]) : 8;
-    const y = m ? parseFloat(m[2]) : 8;
-    let best = null;
-    for (const [dx, dy] of STROKE_NUM_OFFSET_CANDIDATES) {
-      const cx = x + dx;
-      const cy = y + dy;
-      const collides = placed.some(([px, py]) => Math.hypot(px - cx, py - cy) < STROKE_NUM_MIN_DIST);
-      if (!collides) {
-        best = [cx, cy];
-        break;
-      }
-    }
-    if (!best) best = [x, y];
-    placed.push(best);
-    return best;
-  });
-}
+const STROKE_NUM_RADIUS = 5.3;
 function StrokeOrderDiagram({ char, size = 130 }) {
   const [strokes, setStrokes] = useState(null);
   const [failed, setFailed] = useState(false);
+  const [labelPositions, setLabelPositions] = useState(null);
+  const pathRefs = useRef([]);
 
   useEffect(() => {
     let cancelled = false;
     setStrokes(null);
     setFailed(false);
+    setLabelPositions(null);
+    pathRefs.current = [];
     const codepoint = char.codePointAt(0).toString(16).padStart(5, "0");
     fetch(`/strokes/${codepoint}.json`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -2979,10 +2963,67 @@ function StrokeOrderDiagram({ char, size = 130 }) {
     };
   }, [char]);
 
+  useEffect(() => {
+    if (!strokes) return;
+    const allSamples = [];
+    const startPoints = [];
+    pathRefs.current.forEach((el) => {
+      let len = 0;
+      try {
+        len = el ? el.getTotalLength() : 0;
+      } catch (e) {
+        len = 0;
+      }
+      if (!el || !len) {
+        startPoints.push([8, 8]);
+        return;
+      }
+      const sampleCount = Math.max(6, Math.min(24, Math.round(len / 4)));
+      const pts = [];
+      for (let s = 0; s <= sampleCount; s++) {
+        const p = el.getPointAtLength((len * s) / sampleCount);
+        pts.push([p.x, p.y]);
+      }
+      allSamples.push(...pts);
+      startPoints.push(pts[0] || [8, 8]);
+    });
+
+    const minLabelDist = STROKE_NUM_RADIUS * 2 + 1.5;
+    const minStrokeDist = STROKE_NUM_RADIUS + 2.2;
+    const placedLabels = [];
+    const positions = startPoints.map(([x, y]) => {
+      let best = null;
+      for (const [dx, dy] of STROKE_NUM_OFFSET_CANDIDATES) {
+        const cx = x + dx;
+        const cy = y + dy;
+        if (cx < STROKE_NUM_RADIUS || cx > 109 - STROKE_NUM_RADIUS || cy < STROKE_NUM_RADIUS || cy > 109 - STROKE_NUM_RADIUS) continue;
+        const hitsLabel = placedLabels.some(([px, py]) => Math.hypot(px - cx, py - cy) < minLabelDist);
+        const hitsStroke = allSamples.some(([px, py]) => Math.hypot(px - cx, py - cy) < minStrokeDist);
+        if (!hitsLabel && !hitsStroke) {
+          best = [cx, cy];
+          break;
+        }
+      }
+      if (!best) {
+        for (const [dx, dy] of STROKE_NUM_OFFSET_CANDIDATES) {
+          const cx = x + dx;
+          const cy = y + dy;
+          const hitsLabel = placedLabels.some(([px, py]) => Math.hypot(px - cx, py - cy) < minLabelDist);
+          if (!hitsLabel) {
+            best = [cx, cy];
+            break;
+          }
+        }
+      }
+      if (!best) best = [x, y];
+      placedLabels.push(best);
+      return best;
+    });
+    setLabelPositions(positions);
+  }, [strokes]);
+
   if (failed) return null;
   if (!strokes) return <div style={{ fontSize: 11, opacity: 0.6, textAlign: "center" }}>かきじゅん よみこみ中…</div>;
-
-  const numberPositions = strokeNumberPositions(strokes.d);
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -2995,6 +3036,7 @@ function StrokeOrderDiagram({ char, size = 130 }) {
         {strokes.d.map((d, i) => (
           <path
             key={i}
+            ref={(el) => (pathRefs.current[i] = el)}
             d={d}
             fill="none"
             stroke={STROKE_COLORS[i % STROKE_COLORS.length]}
@@ -3004,19 +3046,18 @@ function StrokeOrderDiagram({ char, size = 130 }) {
             opacity="0.92"
           />
         ))}
-        {numberPositions.map(([x, y], i) => (
-          <text
-            key={`n${i}`}
-            x={x}
-            y={y}
-            fontSize="9.5"
-            fill="#241f33"
-            fontWeight="800"
-            style={{ paintOrder: "stroke", stroke: "#fff", strokeWidth: 2.5 }}
-          >
-            {i + 1}
-          </text>
-        ))}
+        {labelPositions &&
+          labelPositions.map(([x, y], i) => {
+            const color = STROKE_COLORS[i % STROKE_COLORS.length];
+            return (
+              <g key={`n${i}`}>
+                <circle cx={x} cy={y} r={STROKE_NUM_RADIUS} fill={color} stroke="#fff" strokeWidth="1" />
+                <text x={x} y={y} fontSize="7" fill="#fff" fontWeight="800" textAnchor="middle" dominantBaseline="central">
+                  {i + 1}
+                </text>
+              </g>
+            );
+          })}
       </svg>
       <div style={{ fontSize: 10, opacity: 0.65, marginTop: 4 }}>
         ぜんぶで {strokes.n}かく／データ：

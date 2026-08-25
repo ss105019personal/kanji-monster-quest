@@ -2969,7 +2969,7 @@ function StrokeOrderDiagram({ char, size = 130 }) {
   useEffect(() => {
     if (!strokes) return;
     const allSamples = [];
-    const startPoints = [];
+    const anchorPairs = [];
     pathRefs.current.forEach((el) => {
       let len = 0;
       try {
@@ -2978,7 +2978,10 @@ function StrokeOrderDiagram({ char, size = 130 }) {
         len = 0;
       }
       if (!el || !len) {
-        startPoints.push([8, 8]);
+        anchorPairs.push([
+          [8, 8],
+          [8, 8],
+        ]);
         return;
       }
       const sampleCount = Math.max(6, Math.min(24, Math.round(len / 4)));
@@ -2988,37 +2991,45 @@ function StrokeOrderDiagram({ char, size = 130 }) {
         pts.push([p.x, p.y]);
       }
       allSamples.push(...pts);
-      startPoints.push(pts[0] || [8, 8]);
+      const start = pts[0] || [8, 8];
+      const end = pts[pts.length - 1] || start;
+      anchorPairs.push([start, end]);
     });
 
     const minLabelDist = STROKE_NUM_RADIUS * 2 + 1;
     const minStrokeDist = STROKE_NUM_RADIUS + 1.6;
     const placedLabels = [];
-    const positions = startPoints.map(([x, y]) => {
+    // どちらの はし（かきはじめ／かきおわり）でも、あいている ほうを えらぶ
+    // （かきはじめ＝ひだり上に かたよりがちな ため）
+    const positions = anchorPairs.map(([start, end]) => {
+      const candidates = [];
+      for (const anchor of [start, end]) {
+        for (const [dx, dy] of STROKE_NUM_OFFSET_CANDIDATES) {
+          candidates.push({ x: anchor[0] + dx, y: anchor[1] + dy, dist: Math.hypot(dx, dy) });
+        }
+      }
+      candidates.sort((a, b) => a.dist - b.dist);
+
       let best = null;
-      for (const [dx, dy] of STROKE_NUM_OFFSET_CANDIDATES) {
-        const cx = x + dx;
-        const cy = y + dy;
-        if (cx < STROKE_NUM_RADIUS || cx > 109 - STROKE_NUM_RADIUS || cy < STROKE_NUM_RADIUS || cy > 109 - STROKE_NUM_RADIUS) continue;
-        const hitsLabel = placedLabels.some(([px, py]) => Math.hypot(px - cx, py - cy) < minLabelDist);
-        const hitsStroke = allSamples.some(([px, py]) => Math.hypot(px - cx, py - cy) < minStrokeDist);
+      for (const c of candidates) {
+        if (c.x < STROKE_NUM_RADIUS || c.x > 109 - STROKE_NUM_RADIUS || c.y < STROKE_NUM_RADIUS || c.y > 109 - STROKE_NUM_RADIUS) continue;
+        const hitsLabel = placedLabels.some(([px, py]) => Math.hypot(px - c.x, py - c.y) < minLabelDist);
+        const hitsStroke = allSamples.some(([px, py]) => Math.hypot(px - c.x, py - c.y) < minStrokeDist);
         if (!hitsLabel && !hitsStroke) {
-          best = [cx, cy];
+          best = [c.x, c.y];
           break;
         }
       }
       if (!best) {
-        for (const [dx, dy] of STROKE_NUM_OFFSET_CANDIDATES) {
-          const cx = x + dx;
-          const cy = y + dy;
-          const hitsLabel = placedLabels.some(([px, py]) => Math.hypot(px - cx, py - cy) < minLabelDist);
+        for (const c of candidates) {
+          const hitsLabel = placedLabels.some(([px, py]) => Math.hypot(px - c.x, py - c.y) < minLabelDist);
           if (!hitsLabel) {
-            best = [cx, cy];
+            best = [c.x, c.y];
             break;
           }
         }
       }
-      if (!best) best = [x, y];
+      if (!best) best = start;
       placedLabels.push(best);
       return best;
     });

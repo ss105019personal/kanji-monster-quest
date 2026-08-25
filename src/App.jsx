@@ -3077,7 +3077,7 @@ function StrokeOrderDiagram({ char, size = 130 }) {
                 fontWeight="400"
                 textAnchor="middle"
                 dominantBaseline="central"
-                style={{ paintOrder: "stroke", stroke: "#1c1a24", strokeWidth: 2, strokeLinejoin: "round" }}
+                style={{ paintOrder: "stroke", stroke: "#1c1a24", strokeWidth: 1.1, strokeOpacity: 0.55, strokeLinejoin: "round" }}
               >
                 {i + 1}
               </text>

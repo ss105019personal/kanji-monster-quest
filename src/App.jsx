@@ -2999,19 +2999,23 @@ function StrokeOrderDiagram({ char, size = 130 }) {
     const minLabelDist = STROKE_NUM_RADIUS * 2 + 1;
     const minStrokeDist = STROKE_NUM_RADIUS + 1.6;
     const placedLabels = [];
-    // どちらの はし（かきはじめ／かきおわり）でも、あいている ほうを えらぶ
-    // （かきはじめ＝ひだり上に かたよりがちな ため）
+    // きゅうくつに ならない かぎり、かきはじめの てんに ばんごうを ふる。
+    // かきはじめの まわりが すべて ふさがっている ときだけ、かきおわりを ためす。
     const positions = anchorPairs.map(([start, end]) => {
-      const candidates = [];
-      for (const anchor of [start, end]) {
-        for (const [dx, dy] of STROKE_NUM_OFFSET_CANDIDATES) {
-          candidates.push({ x: anchor[0] + dx, y: anchor[1] + dy, dist: Math.hypot(dx, dy) });
-        }
-      }
-      candidates.sort((a, b) => a.dist - b.dist);
+      const startCandidates = STROKE_NUM_OFFSET_CANDIDATES.map(([dx, dy]) => ({
+        x: start[0] + dx,
+        y: start[1] + dy,
+        dist: Math.hypot(dx, dy),
+      })).sort((a, b) => a.dist - b.dist);
+      const endCandidates = STROKE_NUM_OFFSET_CANDIDATES.map(([dx, dy]) => ({
+        x: end[0] + dx,
+        y: end[1] + dy,
+        dist: Math.hypot(dx, dy),
+      })).sort((a, b) => a.dist - b.dist);
+      const orderedCandidates = [...startCandidates, ...endCandidates];
 
       let best = null;
-      for (const c of candidates) {
+      for (const c of orderedCandidates) {
         if (c.x < STROKE_NUM_RADIUS || c.x > 109 - STROKE_NUM_RADIUS || c.y < STROKE_NUM_RADIUS || c.y > 109 - STROKE_NUM_RADIUS) continue;
         const hitsLabel = placedLabels.some(([px, py]) => Math.hypot(px - c.x, py - c.y) < minLabelDist);
         const hitsStroke = allSamples.some(([px, py]) => Math.hypot(px - c.x, py - c.y) < minStrokeDist);
@@ -3021,7 +3025,7 @@ function StrokeOrderDiagram({ char, size = 130 }) {
         }
       }
       if (!best) {
-        for (const c of candidates) {
+        for (const c of orderedCandidates) {
           const hitsLabel = placedLabels.some(([px, py]) => Math.hypot(px - c.x, py - c.y) < minLabelDist);
           if (!hitsLabel) {
             best = [c.x, c.y];

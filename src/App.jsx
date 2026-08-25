@@ -3167,7 +3167,7 @@ function WritingPad({ char, size = 200, showAnswer = false }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: size * 0.58,
+              fontSize: size * 0.68,
               color: "#c0392b33",
               fontFamily: "'Klee One', 'Zen Maru Gothic', sans-serif",
               fontWeight: 900,
@@ -3192,7 +3192,7 @@ function WritingPad({ char, size = 200, showAnswer = false }) {
       {showAnswer && (
         <div style={{ marginTop: 12 }}>
           <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 4 }}>✍️ かきじゅん</div>
-          <StrokeOrderDiagram char={char} size={Math.min(size, 150)} />
+          <StrokeOrderDiagram char={char} size={Math.min(size, 200)} />
         </div>
       )}
     </div>
@@ -3983,7 +3983,7 @@ function AppInner() {
                     </div>
                     <div style={styles.writeReadingText}>よみかた：{boss.question.entry.exampleReading}</div>
                     <div style={styles.writeMeaningText}>いみ：{boss.question.entry.meaning}</div>
-                    <WritingPad key={boss.writeKey} char={boss.question.char} size={180} showAnswer={boss.answerRevealed} />
+                    <WritingPad key={boss.writeKey} char={boss.question.char} size={230} showAnswer={boss.answerRevealed} />
                     <div style={styles.bannerWrap}>
                       {!boss.answerRevealed ? (
                         <button style={styles.nextBtn} onClick={onBossRevealAnswer}>
@@ -4098,7 +4098,7 @@ function AppInner() {
               </div>
               <div style={styles.writeReadingText}>よみかた：{question.entry.exampleReading}</div>
               <div style={styles.writeMeaningText}>いみ：{question.entry.meaning}</div>
-              <WritingPad key={writeKey} char={question.char} size={200} showAnswer={answerRevealed} />
+              <WritingPad key={writeKey} char={question.char} size={250} showAnswer={answerRevealed} />
               <div style={styles.bannerWrap}>
                 {!answerRevealed ? (
                   <button style={styles.nextBtn} onClick={() => setAnswerRevealed(true)}>
@@ -4501,7 +4501,7 @@ function AppInner() {
               </span>
             </div>
             <div style={{ marginTop: 10 }}>
-              <StrokeOrderDiagram char={detail} size={130} />
+              <StrokeOrderDiagram char={detail} size={190} />
             </div>
           </div>
         </div>
